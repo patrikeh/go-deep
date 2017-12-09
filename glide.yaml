@@ -1,0 +1,5 @@
+package: github.com/patrikeh/go-deep
+import:
+- package: github.com/golang/glog
+- package: github.com/stretchr/testify
+  version: v1.1.4
