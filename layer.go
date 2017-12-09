@@ -10,16 +10,22 @@ func NewLayer(n int, activation Activation) Layer {
 	return l
 }
 
-func (l Layer) Connect(next Layer, bias *Synapse, weight WeightInitializer) {
+func (l Layer) Connect(next Layer, weight WeightInitializer) {
 	for i := range l {
 		for j := range next {
 			syn := NewSynapse(weight())
 			l[i].Out = append(l[i].Out, syn)
-			next[j].In = append(next[j].In, syn, bias)
+			next[j].In = append(next[j].In, syn)
 		}
 	}
 }
 
+func (l Layer) ApplyBias(biases []*Synapse, weight WeightInitializer) {
+	for i := range l {
+		biases[i] = NewSynapse(weight())
+		l[i].In = append(l[i].In, biases[i])
+	}
+}
 func (l Layer) Fire() {
 	for _, neuron := range l {
 		neuron.Fire()

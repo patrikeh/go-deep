@@ -6,25 +6,60 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Train(t *testing.T) {
+func Test_Training(t *testing.T) {
 	data := []Example{
-		Example{[]float64{-5}, []float64{0}},
-		Example{[]float64{-5}, []float64{0}},
-		Example{[]float64{-5}, []float64{0}},
+		Example{[]float64{0}, []float64{0}},
+		Example{[]float64{0}, []float64{0}},
+		Example{[]float64{0}, []float64{0}},
 		Example{[]float64{5}, []float64{1}},
 		Example{[]float64{5}, []float64{1}},
 	}
 
-	nn := NewNeural(1, []int{1}, Sigmoid, Random)
+	n := NewNeural(&Config{
+		Inputs:     1,
+		Layout:     []int{1, 1},
+		Activation: Sigmoid,
+		Weight:     Random,
+		Bias:       1,
+	})
 
 	for i := 0; i < 1000; i++ {
 		for _, data := range data {
-			Backpropagate(nn, data, 0.1, 0)
+			Learn(n, data, 0.5, 0)
 		}
 	}
-	v := nn.Feed([]float64{-5})
-	assert.InEpsilon(t, 1, 1+v[0], 0.1)
-	v = nn.Feed([]float64{5})
-	assert.InEpsilon(t, 1.0, v[0], 0.1)
 
+	v := n.Feed([]float64{0})
+	assert.InEpsilon(t, 1, 1+v[0], 0.1)
+	v = n.Feed([]float64{5})
+	assert.InEpsilon(t, 1.0, v[0], 0.1)
+}
+
+func Test_Prediction(t *testing.T) {
+	var data = []Example{
+		{[]float64{2.7810836, 2.550537003}, []float64{0}},
+		{[]float64{1.465489372, 2.362125076}, []float64{0}},
+		{[]float64{3.396561688, 4.400293529}, []float64{0}},
+		{[]float64{1.38807019, 1.850220317}, []float64{0}},
+		{[]float64{3.06407232, 3.005305973}, []float64{0}},
+		{[]float64{7.627531214, 2.759262235}, []float64{1}},
+		{[]float64{5.332441248, 2.088626775}, []float64{1}},
+		{[]float64{6.922596716, 1.77106367}, []float64{1}},
+		{[]float64{8.675418651, -0.242068655}, []float64{1}},
+		{[]float64{7.673756466, 3.508563011}, []float64{1}},
+	}
+
+	n := NewNeural(&Config{
+		Inputs:     2,
+		Layout:     []int{2, 1},
+		Activation: Sigmoid,
+		Weight:     Random,
+		Bias:       1,
+	})
+
+	Train(n, data, 1000, 0.5, 0)
+
+	for _, d := range data {
+		assert.InEpsilon(t, n.Feed(d.Input)[0]+1, d.Response[0]+1, 0.1)
+	}
 }

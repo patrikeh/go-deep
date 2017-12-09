@@ -2,10 +2,21 @@ package deep
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Init(t *testing.T) {
-	n := NewNeural(3, []int{4, 4, 2}, Tanh, Random)
-	n.Feed([]float64{1, 1, 3})
+	n := NewNeural(&Config{
+		Inputs:     3,
+		Layout:     []int{4, 4, 2},
+		Activation: Tanh,
+		Weight:     Random,
+		Bias:       0,
+	})
 
+	assert.Len(t, n.Layers, len(n.Config.Layout))
+	for i, l := range n.Layers {
+		assert.Len(t, l, n.Config.Layout[i])
+	}
 }

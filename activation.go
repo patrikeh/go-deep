@@ -14,11 +14,6 @@ var Tanh = Activation{
 	df: func(y float64) float64 { return 1 - math.Pow(y, 2) },
 }
 
-var Sigmoid = Activation{
-	f:  NewLogisticFunc(1),
-	df: func(y float64) float64 { return y * (1 - y) },
-}
-
 var ReLU = Activation{ // Leaky ReLU
 	f: func(x float64) float64 { return math.Max(x, 0) },
 	df: func(y float64) float64 {
@@ -27,6 +22,11 @@ var ReLU = Activation{ // Leaky ReLU
 		}
 		return 0.01
 	},
+}
+
+var Sigmoid = Activation{
+	f:  NewLogisticFunc(1),
+	df: func(y float64) float64 { return y * (1 - y) },
 }
 
 func NewLogisticFunc(a float64) ActivationFunction {
