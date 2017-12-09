@@ -1,6 +1,9 @@
 package deep
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Example struct {
 	Input    []float64
@@ -27,25 +30,40 @@ func (e Examples) Split(p float64) (first, second Examples) {
 	return
 }
 
-/*
-func TrainWithValidation(n *Neural, examples []Example, validation []Example, epochs int, lr, lambda float64) {
-}
-*/
-func Train(n *Neural, examples Examples, epochs int, lr, lambda float64) {
+func (n *Neural) Train(examples Examples, epochs int, lr, lambda float64) {
 	for i := 0; i < epochs; i++ {
 		examples.Shuffle()
 		for j := 0; j < len(examples); j++ {
-			Learn(n, examples[j], lr, lambda)
+			n.Learn(examples[j], lr, lambda)
 		}
 	}
 }
 
-func Learn(n *Neural, e Example, lr, lambda float64) {
-	n.Feed(e.Input)
-	Backpropagate(n, e, lr, lambda)
+func (n *Neural) TrainWithCrossValidation(examples, validation Examples, iterations, xvi int, lr, reg float64) {
+	for i := 0; i < iterations; i++ {
+		n.Train(examples, 1, lr, reg)
+		e := n.CrossValidate(examples)
+		if i%xvi == 0 {
+			fmt.Printf("Iteration %d | Error: %.5f\n", i, e)
+		}
+	}
 }
 
-func Backpropagate(n *Neural, e Example, lr, lambda float64) {
+func (n *Neural) CrossValidate(validation Examples) float64 {
+	predictions, responses := make([][]float64, len(validation)), make([][]float64, len(validation))
+	for i := 0; i < len(validation); i++ {
+		predictions[i] = n.Feed(validation[i].Input)
+		responses[i] = validation[i].Response
+	}
+	return n.Config.Error(responses, predictions)
+}
+
+func (n *Neural) Learn(e Example, lr, lambda float64) {
+	n.Feed(e.Input)
+	n.Backpropagate(e, lr, lambda)
+}
+
+func (n *Neural) Backpropagate(e Example, lr, lambda float64) {
 	lambda = lambda / float64(len(e.Input))
 	deltas := make([][]float64, len(n.Layers))
 

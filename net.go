@@ -15,6 +15,7 @@ type Config struct {
 	Layout     []int
 	Activation Activation
 	Weight     WeightInitializer
+	Error      ErrorMeasure
 	Bias       float64
 }
 

@@ -2,17 +2,6 @@ package deep
 
 import "math"
 
-func mse(estimate, actual []float64) float64 {
-	n := len(estimate)
-
-	var sum float64
-	for i := 0; i < n; i++ {
-		sum += math.Pow(estimate[i]-actual[i], 2)
-	}
-
-	return sum / float64(n)
-}
-
 func mean(xx []float64) float64 {
 	var sum float64
 	for _, x := range xx {
