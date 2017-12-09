@@ -1,5 +1,9 @@
 # go-deep
-Another not so feature-complete neural network implementation.
+Another not so feature-complete neural network implementation. Currently supports some small extras that I was not able to find in other packages:
+- Bias nodes
+- L2 regularization
+- Modular activation functions (currently hyperbolic, sigmoid, leaky ReLU)
+- Cross-validated training
 
 ## Usage
 Define some data...
