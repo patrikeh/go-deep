@@ -10,6 +10,8 @@ import (
 )
 
 func Test_BoundedRegression(t *testing.T) {
+	rand.Seed(0)
+
 	squares := Examples{}
 	for i := 0.0; i < 1; i += 0.01 {
 		squares = append(squares, Example{Input: []float64{i}, Response: []float64{math.Pow(i, 2)}})
@@ -32,8 +34,9 @@ func Test_BoundedRegression(t *testing.T) {
 }
 
 func Test_RegressionLinearOuts(t *testing.T) {
+	rand.Seed(0)
 	squares := Examples{}
-	for i := 1.0; i < 75.0; i++ {
+	for i := 0.0; i < 100.0; i++ {
 		squares = append(squares, Example{Input: []float64{i}, Response: []float64{math.Sqrt(i)}})
 	}
 	n := NewNeural(&Config{
@@ -48,13 +51,15 @@ func Test_RegressionLinearOuts(t *testing.T) {
 	n.Train(squares, 3000, 0.0001, 0.0001)
 
 	for i := 0; i < 20; i++ {
-		x := float64(rand.Intn(75))
+		x := float64(rand.Intn(100))
 		fmt.Printf("want: %+v have: %+v\n", math.Sqrt(x), n.Forward([]float64{x}))
-		assert.InEpsilon(t, math.Sqrt(x), n.Forward([]float64{x})[0], 0.05)
+		assert.InEpsilon(t, math.Sqrt(x), n.Forward([]float64{x})[0], 0.1)
 	}
 }
 
 func Test_Training(t *testing.T) {
+	rand.Seed(0)
+
 	data := Examples{
 		Example{[]float64{0}, []float64{0}},
 		Example{[]float64{0}, []float64{0}},
@@ -97,6 +102,7 @@ var data = []Example{
 }
 
 func Test_Prediction(t *testing.T) {
+	rand.Seed(0)
 
 	n := NewNeural(&Config{
 		Inputs:     2,
