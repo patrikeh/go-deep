@@ -3,6 +3,7 @@ Another not so feature-complete feed forward/backpropagation neural network impl
 - Bias nodes
 - L2 regularization
 - Modular activation functions (currently hyperbolic, sigmoid, leaky ReLU)
+- Softmax/Linear output activations
 - Cross-validated training
 
 ## Usage
