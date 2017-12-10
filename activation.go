@@ -37,3 +37,8 @@ func NewLogisticFunc(a float64) ActivationFunction {
 func LogisticFunc(x, a float64) float64 {
 	return 1 / (1 + math.Exp(-a*x))
 }
+
+var Linear = Activation{
+	f:  func(x float64) float64 { return x },
+	df: func(x float64) float64 { return 1 },
+}

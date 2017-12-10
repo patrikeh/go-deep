@@ -78,7 +78,7 @@ func (n *Neural) Backpropagate(e Example, lr, lambda float64) {
 		deltas[i] = make([]float64, len(l))
 		for j, n := range l {
 			var sum float64
-			for k, s := range n.Out { // only looks at outs, biases ignores?
+			for k, s := range n.Out {
 				sum += s.Weight * deltas[i+1][k]
 			}
 			deltas[i][j] = n.Activation.df(n.Value) * sum

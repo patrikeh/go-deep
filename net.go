@@ -11,22 +11,26 @@ type Neural struct {
 }
 
 type Config struct {
-	Inputs     int
-	Layout     []int
-	Activation Activation
-	Weight     WeightInitializer
-	Error      ErrorMeasure
-	Bias       float64
+	Inputs        int
+	Layout        []int
+	Activation    Activation
+	OutActivation *Activation
+	Weight        WeightInitializer
+	Error         ErrorMeasure
+	Bias          float64
 }
 
 func NewNeural(c *Config) *Neural {
 
 	layers := make([]Layer, len(c.Layout))
 	for i := range layers {
-		layers[i] = NewLayer(c.Layout[i], c.Activation)
+		act := c.Activation
+		if i == (len(layers)-1) && c.OutActivation != nil {
+			act = *c.OutActivation
+		}
+		layers[i] = NewLayer(c.Layout[i], act)
 	}
 
-	// Connect layers & apply biases
 	biases := make([][]*Synapse, len(layers)-1)
 	for i := 0; i < len(layers)-1; i++ {
 		biases[i] = make([]*Synapse, len(layers[i+1]))
@@ -34,7 +38,6 @@ func NewNeural(c *Config) *Neural {
 		layers[i].Connect(layers[i+1], c.Weight)
 	}
 
-	// Set in synapses
 	for _, neuron := range layers[0] {
 		neuron.In = make([]*Synapse, c.Inputs)
 		for i := range neuron.In {
@@ -42,7 +45,6 @@ func NewNeural(c *Config) *Neural {
 		}
 	}
 
-	// Set out synapses
 	for _, neuron := range layers[len(layers)-1] {
 		neuron.Out = []*Synapse{NewSynapse(c.Weight())}
 	}

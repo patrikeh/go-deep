@@ -1,6 +1,8 @@
 package deep
 
 import (
+	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,6 +21,24 @@ var data = []Example{
 	{[]float64{7.673756466, 3.508563011}, []float64{1}},
 }
 
+func Test_LinearOuts(t *testing.T) {
+	squares := Examples{}
+	for i := 0.0; i < 15; i++ {
+		squares = append(squares, Example{Input: []float64{i}, Response: []float64{math.Pow(i, 2)}})
+	}
+	n := NewNeural(&Config{
+		Inputs:        1,
+		Layout:        []int{2, 2, 1},
+		Activation:    Sigmoid,
+		OutActivation: &Linear,
+		Weight:        Random,
+		Bias:          0,
+	})
+	n.Train(squares, 10, 0.1, 0.0)
+	fmt.Printf("%+v\n", n.Feed([]float64{1}))
+	fmt.Printf("%+v\n", n.Feed([]float64{10}))
+
+}
 func Test_Training(t *testing.T) {
 	data := []Example{
 		Example{[]float64{0}, []float64{0}},
@@ -52,15 +72,16 @@ func Test_Prediction(t *testing.T) {
 
 	n := NewNeural(&Config{
 		Inputs:     2,
-		Layout:     []int{1, 1},
+		Layout:     []int{2, 2, 1},
 		Activation: Sigmoid,
 		Weight:     Random,
 		Bias:       1,
 	})
 
-	n.Train(data, 1000, 0.5, 0)
+	n.Train(data, 5000, 0.5, 0)
 
 	for _, d := range data {
+		fmt.Printf("%+v\n", n.Feed(d.Input)[0])
 		assert.InEpsilon(t, n.Feed(d.Input)[0]+1, d.Response[0]+1, 0.1)
 	}
 }
@@ -70,7 +91,7 @@ func Test_CrossVal(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:     2,
 		Layout:     []int{1, 1},
-		Activation: Sigmoid,
+		Activation: Tanh,
 		Weight:     Random,
 		Error:      MSE,
 		Bias:       1,
