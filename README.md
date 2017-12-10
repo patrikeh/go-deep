@@ -25,7 +25,7 @@ Create a network with two hidden layers of size 2 and 2 respectively:
 ```go
 n := deep.NewNeural(&deep.Config{
 	Inputs:    	 2,                                     // Input dimensionality
-	Layout:     	[]int{2, 2, 1},                         // 2x hidden layers with 2 nodes each, 1 output
+	Layout:     	[]int{2, 2, 1},                         // 2x hidden layers with 2 neurons each, 1 output
 	Activation: 	{deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear, deep.Softmax},
 	OutActivation: 	&deep.Linear,				// Output layer activation
 	Weight:     	{deep.Random, deep.Normal},             // Weight initializers
@@ -37,13 +37,13 @@ Train!
 ```go
 n.Train(data, 1000, 0.5, 0) // Data, iterations, learning rate, L2 regularization parameter (gamma)
 ```
-Or with cross-validation:
+Or with cross-validation, printing error at every 10th interval:
 ```go
 training, heldout := data.Split(0.5)
 n.TrainWithCrossValidation(training, heldout, 1000, 10, 0.5, 0)
 ```
 And make some predictions:
 ```go
-n.Feed(data[i].Input[0]) => [0.9936341906634203]
-n.Feed(data[i].Input[5]) => [0.0058055785217672636]
+n.Feed(data[i].Input[0]) => [0.0058055785217672636]
+n.Feed(data[i].Input[5]) => [0.9936341906634203]
 ```
