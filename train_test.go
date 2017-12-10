@@ -1,7 +1,6 @@
 package deep
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"testing"
@@ -52,7 +51,6 @@ func Test_RegressionLinearOuts(t *testing.T) {
 
 	for i := 0; i < 20; i++ {
 		x := float64(rand.Intn(100))
-		fmt.Printf("want: %+v have: %+v\n", math.Sqrt(x), n.Forward([]float64{x}))
 		assert.InEpsilon(t, math.Sqrt(x), n.Forward([]float64{x})[0], 0.1)
 	}
 }
