@@ -26,10 +26,10 @@ Create a network with two hidden layers of size 2 and 2 respectively:
 n := deep.NewNeural(&deep.Config{
 	Inputs:    	 2,                                     // Input dimensionality
 	Layout:     	[]int{2, 2, 1},                         // 2x hidden layers with 2 nodes each, 1 output
-	Activation: 	{deep.Sigmoid, deep.Tanh, deep.ReLU},   // Activation function
+	Activation: 	{deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear, deep.Softmax},
+	OutActivation: 	&deep.Linear,				// Output layer activation
 	Weight:     	{deep.Random, deep.Normal},             // Weight initializers
 	Error:      	deep.MSE,                               // Loss function
-	OutActivation:  {LinearOut, SoftmaxOut, DefaultOut}     // Output layer activation - defaults to Activation
 	Bias:       	1,                                      // Bias constant (0 disables)
 })
 ```
