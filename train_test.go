@@ -1,6 +1,7 @@
 package deep
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"testing"
@@ -37,20 +38,20 @@ func Test_RegressionLinearOuts(t *testing.T) {
 	}
 	n := NewNeural(&Config{
 		Inputs:        1,
-		Layout:        []int{5, 1},
-		Activation:    Sigmoid,
+		Layout:        []int{3, 3, 1},
+		Activation:    ReLU,
 		OutActivation: &Linear,
 		Weight:        NewNormal(1, 0),
 		Bias:          1,
 	})
 
-	n.Train(squares, 2000, 0.001, 0.0001)
+	n.Train(squares, 3000, 0.0001, 0.0001)
 
 	for i := 0; i < 20; i++ {
 		x := float64(rand.Intn(75))
-		assert.InEpsilon(t, math.Sqrt(x), n.Forward([]float64{x})[0], 0.1)
+		fmt.Printf("want: %+v have: %+v\n", math.Sqrt(x), n.Forward([]float64{x}))
+		assert.InEpsilon(t, math.Sqrt(x), n.Forward([]float64{x})[0], 0.05)
 	}
-	println(n.String())
 }
 
 func Test_Training(t *testing.T) {
