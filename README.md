@@ -8,7 +8,7 @@ Another not so feature-complete feed forward/backpropagation neural network impl
 
 ## Usage
 Define some data...
-```
+```go
 var data = []Example{
 	{[]float64{2.7810836, 2.550537003}, []float64{0}},
 	{[]float64{1.465489372, 2.362125076}, []float64{0}},
@@ -24,7 +24,7 @@ var data = []Example{
 ```
 
 Create a network with two hidden layers of size 2 and 2 respectively:
-```
+```go
 n := deep.NewNeural(&deep.Config{
 	Inputs:     2,                                      // Input dimensionality
 	Layout:     []int{2, 2, 1},                         // 2x hidden layers with 2 nodes each, 1 output
@@ -35,16 +35,16 @@ n := deep.NewNeural(&deep.Config{
 })
 ```
 Train!
-```
+```go
 n.Train(data, 1000, 0.5, 0) // Data, iterations, learning rate, L2 regularization parameter (gamma)
 ```
 Or with cross-validation:
-```
+```go
 training, heldout := data.Split(0.5)
 n.TrainWithCrossValidation(training, heldout, 1000, 10, 0.5, 0)
 ```
 And make some predictions:
-```
+```go
 n.Feed(data[i].Input[0]) => [0.9936341906634203]
 n.Feed(data[i].Input[5]) => [0.0058055785217672636]
 ```
