@@ -1,6 +1,8 @@
 package deep
 
 import (
+	"fmt"
+
 	"github.com/golang/glog"
 )
 
@@ -33,8 +35,7 @@ func NewNeural(c *Config) *Neural {
 
 	biases := make([][]*Synapse, len(layers)-1)
 	for i := 0; i < len(layers)-1; i++ {
-		biases[i] = make([]*Synapse, len(layers[i+1]))
-		layers[i+1].ApplyBias(biases[i], c.Weight)
+		biases[i] = layers[i+1].ApplyBias(c.Weight)
 		layers[i].Connect(layers[i+1], c.Weight)
 	}
 
@@ -57,13 +58,13 @@ func NewNeural(c *Config) *Neural {
 }
 
 func (n *Neural) Fire() {
-	for _, l := range n.Layers {
-		l.Fire()
-	}
 	for _, biases := range n.Biases {
 		for _, bias := range biases {
 			bias.Fire(n.Config.Bias)
 		}
+	}
+	for _, l := range n.Layers {
+		l.Fire()
 	}
 }
 
@@ -77,7 +78,7 @@ func (n *Neural) set(input []float64) {
 		}
 	}
 }
-func (n *Neural) Feed(input []float64) []float64 {
+func (n *Neural) Forward(input []float64) []float64 {
 	n.set(input)
 	n.Fire()
 
@@ -87,4 +88,12 @@ func (n *Neural) Feed(input []float64) []float64 {
 		out[i] = neuron.Value
 	}
 	return out
+}
+
+func (n *Neural) String() string {
+	var s string
+	for _, l := range n.Layers {
+		s = fmt.Sprintf("%s\n%s", s, l)
+	}
+	return s
 }
