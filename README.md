@@ -2,9 +2,12 @@
 Another not so feature-complete feed forward/backpropagation neural network implementation. Supports some small extras that I was not able to find in other packages:
 - Bias nodes
 - L2 regularization
-- Modular activation functions (currently hyperbolic, sigmoid, leaky ReLU)
-- Softmax/Linear output activations
+- Modular activation functions (currently hyperbolic, sigmoid, leaky ReLU, linear)
 - Cross-validated training
+
+Todo:
+- Dropout
+- Softmax for multi-class classification problems
 
 ## Usage
 Define some data...
