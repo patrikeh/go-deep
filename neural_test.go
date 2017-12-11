@@ -10,7 +10,7 @@ func Test_Init(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:     3,
 		Layout:     []int{4, 4, 2},
-		Activation: Tanh,
+		Activation: ActivationTanh,
 		Weight:     Random,
 		Bias:       0,
 	})

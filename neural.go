@@ -15,20 +15,24 @@ type Neural struct {
 type Config struct {
 	Inputs        int
 	Layout        []int
-	Activation    Activation
-	OutActivation *Activation
-	Weight        WeightInitializer
-	Error         ErrorMeasure
+	Activation    ActivationType
+	OutActivation ActivationType
+	Weight        WeightInitializer `json:"-"`
+	Error         ErrorMeasure      `json:"-"`
 	Bias          float64
 }
 
 func NewNeural(c *Config) *Neural {
 
+	if c.Weight == nil {
+		c.Weight = Random
+	}
+
 	layers := make([]Layer, len(c.Layout))
 	for i := range layers {
-		act := c.Activation
-		if i == (len(layers)-1) && c.OutActivation != nil {
-			act = *c.OutActivation
+		act := GetActivation(c.Activation)
+		if i == (len(layers)-1) && c.OutActivation != ActivationNone {
+			act = GetActivation(c.OutActivation)
 		}
 		layers[i] = NewLayer(c.Layout[i], act)
 	}

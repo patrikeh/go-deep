@@ -18,7 +18,7 @@ func Test_BoundedRegression(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:     1,
 		Layout:     []int{4, 4, 1},
-		Activation: Sigmoid,
+		Activation: ActivationSigmoid,
 		Weight:     Random,
 		Error:      MSE,
 		Bias:       1,
@@ -41,8 +41,8 @@ func Test_RegressionLinearOuts(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:        1,
 		Layout:        []int{3, 3, 1},
-		Activation:    ReLU,
-		OutActivation: &Linear,
+		Activation:    ActivationReLU,
+		OutActivation: ActivationLinear,
 		Weight:        NewNormal(1, 0),
 		Bias:          1,
 	})
@@ -69,7 +69,7 @@ func Test_Training(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:     1,
 		Layout:     []int{1, 1},
-		Activation: Sigmoid,
+		Activation: ActivationSigmoid,
 		Weight:     Random,
 		Bias:       1,
 	})
@@ -105,7 +105,7 @@ func Test_Prediction(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:     2,
 		Layout:     []int{2, 2, 1},
-		Activation: Sigmoid,
+		Activation: ActivationSigmoid,
 		Weight:     Random,
 		Bias:       1,
 	})
@@ -122,7 +122,7 @@ func Test_CrossVal(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:     2,
 		Layout:     []int{1, 1},
-		Activation: Tanh,
+		Activation: ActivationTanh,
 		Weight:     Random,
 		Error:      MSE,
 		Bias:       1,

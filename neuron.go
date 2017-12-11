@@ -1,10 +1,10 @@
 package deep
 
 type Neuron struct {
-	Activation Activation
+	Activation Activation `json:"-"`
 	In         []*Synapse
 	Out        []*Synapse
-	Value      float64
+	Value      float64 `json:"-"`
 }
 
 func NewNeuron(activation Activation) *Neuron {
@@ -28,7 +28,7 @@ func (n *Neuron) Fire() {
 
 type Synapse struct {
 	Weight  float64
-	In, Out float64
+	In, Out float64 `json:"-"`
 }
 
 func NewSynapse(weight float64) *Synapse {
