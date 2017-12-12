@@ -1,15 +1,15 @@
 package deep
 
 type Neuron struct {
-	Activation Activation `json:"-"`
-	In         []*Synapse
-	Out        []*Synapse
-	Value      float64 `json:"-"`
+	A     ActivationType `json:"-"`
+	In    []*Synapse
+	Out   []*Synapse
+	Value float64 `json:"-"`
 }
 
-func NewNeuron(activation Activation) *Neuron {
+func NewNeuron(activation ActivationType) *Neuron {
 	return &Neuron{
-		Activation: activation,
+		A: activation,
 	}
 }
 
@@ -18,8 +18,7 @@ func (n *Neuron) Fire() {
 	for _, s := range n.In {
 		sum += s.Out
 	}
-
-	n.Value = n.Activation.f(sum)
+	n.Value = Act(n.A).f(sum)
 
 	for _, s := range n.Out {
 		s.Fire(n.Value)

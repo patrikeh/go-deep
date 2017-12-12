@@ -5,30 +5,25 @@ import (
 )
 
 type Dump struct {
-	Config     *Config
-	Weights    [][][]float64
-	OutWeights []float64
+	Config  *Config
+	Weights [][][]float64
 }
 
 func (n Neural) Dump() *Dump {
 	weights := make([][][]float64, len(n.Layers))
 	for i, l := range n.Layers {
-		weights[i] = make([][]float64, len(l))
-		for j, n := range l {
+		weights[i] = make([][]float64, len(l.Neurons))
+		for j, n := range l.Neurons {
 			weights[i][j] = make([]float64, len(n.In))
 			for k, in := range n.In {
 				weights[i][j][k] = in.Weight
 			}
 		}
 	}
-	outWeights := make([]float64, len(n.Layers[len(n.Layers)-1]))
-	for i, n := range n.Layers[len(n.Layers)-1] {
-		outWeights[i] = n.Out[0].Weight
-	}
+
 	return &Dump{
-		Config:     n.Config,
-		Weights:    weights,
-		OutWeights: outWeights,
+		Config:  n.Config,
+		Weights: weights,
 	}
 }
 
@@ -36,19 +31,11 @@ func FromDump(dump *Dump) *Neural {
 	neural := NewNeural(dump.Config)
 
 	for i, l := range neural.Layers {
-		for j, n := range l {
+		for j, n := range l.Neurons {
 			for k := range n.In {
-				neural.Layers[i][j].In[k].Weight = dump.Weights[i][j][k]
+				neural.Layers[i].Neurons[j].In[k].Weight = dump.Weights[i][j][k]
 			}
-			act := GetActivation(neural.Config.Activation)
-			if i == len(neural.Layers)-1 && neural.Config.OutActivation != ActivationNone {
-				act = GetActivation(neural.Config.OutActivation)
-			}
-			n.Activation = act
 		}
-	}
-	for i, n := range neural.Layers[len(neural.Layers)-1] {
-		n.Out[0].Weight = dump.OutWeights[i]
 	}
 
 	return neural

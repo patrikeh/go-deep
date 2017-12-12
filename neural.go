@@ -7,51 +7,53 @@ import (
 )
 
 type Neural struct {
-	Layers []Layer
+	Layers []*Layer
 	Biases [][]*Synapse
 	Config *Config
 }
 
 type Config struct {
-	Inputs        int
-	Layout        []int
-	Activation    ActivationType
-	OutActivation ActivationType
-	Weight        WeightInitializer `json:"-"`
-	Error         ErrorMeasure      `json:"-"`
-	Bias          float64
+	Inputs     int
+	Layout     []int
+	Activation ActivationType
+	Mode       Mode
+	Weight     WeightInitializer `json:"-"`
+	Error      ErrorMeasure      `json:"-"`
+	Bias       float64
 }
 
 func NewNeural(c *Config) *Neural {
 
 	if c.Weight == nil {
-		c.Weight = Random
+		c.Weight = NewUniform(0.5, 0)
+	}
+	if c.Activation == ActivationNone {
+		c.Activation = ActivationSigmoid
 	}
 
-	layers := make([]Layer, len(c.Layout))
+	layers := make([]*Layer, len(c.Layout))
 	for i := range layers {
-		act := GetActivation(c.Activation)
-		if i == (len(layers)-1) && c.OutActivation != ActivationNone {
-			act = GetActivation(c.OutActivation)
+		act := c.Activation
+		if i == (len(layers)-1) && c.Mode != ModeDefault {
+			act = OutputActivation(c.Mode)
 		}
 		layers[i] = NewLayer(c.Layout[i], act)
 	}
 
-	biases := make([][]*Synapse, len(layers)-1)
 	for i := 0; i < len(layers)-1; i++ {
-		biases[i] = layers[i+1].ApplyBias(c.Weight)
 		layers[i].Connect(layers[i+1], c.Weight)
 	}
 
-	for _, neuron := range layers[0] {
+	for _, neuron := range layers[0].Neurons {
 		neuron.In = make([]*Synapse, c.Inputs)
 		for i := range neuron.In {
 			neuron.In[i] = NewSynapse(c.Weight())
 		}
 	}
 
-	for _, neuron := range layers[len(layers)-1] {
-		neuron.Out = []*Synapse{NewSynapse(c.Weight())}
+	biases := make([][]*Synapse, len(layers))
+	for i := 0; i < len(layers); i++ {
+		biases[i] = layers[i].ApplyBias(c.Weight)
 	}
 
 	return &Neural{
@@ -73,12 +75,12 @@ func (n *Neural) Fire() {
 }
 
 func (n *Neural) set(input []float64) {
-	for _, n := range n.Layers[0] {
-		if len(n.In) != len(input) {
+	for _, n := range n.Layers[0].Neurons {
+		if len(n.In)-1 != len(input) {
 			glog.Errorf("Invalid input dimension - expected: %d got: %d", len(n.In), len(input))
 		}
-		for i, s := range n.In {
-			s.Fire(input[i])
+		for i := 0; i < len(n.In)-1; i++ {
+			n.In[i].Fire(input[i])
 		}
 	}
 }
@@ -87,8 +89,8 @@ func (n *Neural) Forward(input []float64) []float64 {
 	n.Fire()
 
 	outLayer := n.Layers[len(n.Layers)-1]
-	out := make([]float64, len(outLayer))
-	for i, neuron := range outLayer {
+	out := make([]float64, len(outLayer.Neurons))
+	for i, neuron := range outLayer.Neurons {
 		out[i] = neuron.Value
 	}
 	return out

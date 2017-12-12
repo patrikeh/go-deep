@@ -43,7 +43,7 @@ func (n *Neural) Train(examples Examples, epochs int, lr, lambda float64) {
 func (n *Neural) TrainWithCrossValidation(examples, validation Examples, iterations, xvi int, lr, reg float64) {
 	for i := 0; i < iterations; i++ {
 		n.Train(examples, 1, lr, reg)
-		if i%xvi == 0 {
+		if xvi > 0 && i%xvi == 0 {
 			e := n.CrossValidate(examples)
 			fmt.Printf("Iteration %d | Error: %.5f\n", i, e)
 		}
@@ -79,27 +79,28 @@ func (n *Neural) Back(ideal []float64, lr, lambda float64) {
 	errors := make([][]float64, len(n.Layers))
 
 	last := len(n.Layers) - 1
-	errors[last] = make([]float64, len(n.Layers[last]))
-	for i, n := range n.Layers[last] {
-		errors[last][i] = n.Activation.df(n.Value) * (ideal[i] - n.Value)
+	errors[last] = make([]float64, len(n.Layers[last].Neurons))
+
+	for i, n := range n.Layers[last].Neurons {
+		errors[last][i] = Act(n.A).df(n.Value) * (ideal[i] - n.Value)
 	}
 
 	for i := last - 1; i >= 0; i-- {
-		errors[i] = make([]float64, len(n.Layers[i]))
-		for j, n := range n.Layers[i] {
+		errors[i] = make([]float64, len(n.Layers[i].Neurons))
+		for j, n := range n.Layers[i].Neurons {
 			var sum float64
 			for k, s := range n.Out {
 				sum += s.Weight * errors[i+1][k]
 			}
-			errors[i][j] = n.Activation.df(n.Value) * sum
+			errors[i][j] = Act(n.A).df(n.Value) * sum
 		}
 	}
 
 	for i, l := range n.Layers {
-		for j, n := range l {
+		for j, n := range l.Neurons {
 			for _, s := range n.In {
-				s.Weight -= s.Weight * lr * lambda // L2 regularization lambda in (0,1)
 				s.Weight += lr * errors[i][j] * s.In
+				s.Weight -= s.Weight * lr * lambda // L2 regularization lambda in (0,1)
 			}
 		}
 	}

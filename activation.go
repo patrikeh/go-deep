@@ -2,7 +2,25 @@ package deep
 
 import "math"
 
-func GetActivation(act ActivationType) Activation {
+type Mode int
+
+const (
+	ModeDefault    Mode = 0 // Use default output layer activations (i.e. sigmoid, tanh, relu)
+	ModeMulti      Mode = 1 // Softmax output layer
+	ModeRegression Mode = 2 // Linear output layer
+)
+
+func OutputActivation(c Mode) ActivationType {
+	switch c {
+	case ModeMulti:
+		return ActivationSoftmax
+	case ModeRegression:
+		return ActivationLinear
+	}
+	return ActivationNone
+}
+
+func Act(act ActivationType) Activation {
 	switch act {
 	case ActivationSigmoid:
 		return Sigmoid{}
@@ -11,6 +29,8 @@ func GetActivation(act ActivationType) Activation {
 	case ActivationReLU:
 		return ReLU{}
 	case ActivationLinear:
+		return Linear{}
+	case ActivationSoftmax:
 		return Linear{}
 	}
 	return Linear{}
@@ -24,6 +44,7 @@ const (
 	ActivationTanh    ActivationType = 2
 	ActivationReLU    ActivationType = 3
 	ActivationLinear  ActivationType = 4
+	ActivationSoftmax ActivationType = 5
 )
 
 type Activation interface {

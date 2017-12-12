@@ -1,13 +1,25 @@
 # go-deep
-Another not so feature-complete feed forward/backpropagation neural network implementation. Supports some small extras that I was not able to find in other packages:
+Feed forward/backpropagation neural network implementation. Currently supports:
 - Bias nodes
 - L2 regularization
+<<<<<<< HEAD
 - Modular activation functions (currently hyperbolic, sigmoid, leaky ReLU, linear)
 - Cross-validated training
 
 Todo:
 - Dropout
 - Softmax for multi-class classification problems
+=======
+- Modular activation functions (sigmoid, hyperbolic, ReLU)
+- Classification modes: Regression (linear output), Multiclass (softmax output)
+- Cross-validated training
+
+Networks are modeled as a set of neurons connected through synapses. Consequently not the fastest implementation, but hopefully an intuitive one.
+
+Todo:
+- Dropout
+- Automated parameter tuning, momentum
+>>>>>>> add modes regression, multiclass, binary; testing; wine example
 
 ## Usage
 Define some data...
@@ -27,13 +39,20 @@ var data = []Example{
 Create a network with two hidden layers of size 2 and 2 respectively:
 ```go
 n := deep.NewNeural(&deep.Config{
-	Inputs:    	 2,                                     // Input dimensionality
-	Layout:     	[]int{2, 2, 1},                         // 2x hidden layers with 2 neurons each, 1 output
-	Activation: 	{deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear, deep.Softmax},
-	OutActivation: 	&deep.Linear,				// Output layer activation
-	Weight:     	{deep.Random, deep.Normal},             // Weight initializers
-	Error:      	deep.MSE,                               // Loss function
-	Bias:       	1,                                      // Bias constant (0 disables)
+	/* Input dimensionality */
+	Inputs: 2,
+	/* Two hidden layers consisting of two neurons each, and a single output */
+	Layout: []int{2, 2, 1},
+	/* Activation functions, available options are {deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear} */
+	Activation: deep.Sigmoid,
+	/* Determines output layer activation: {ModeDefault, ModeRegression, ModeMulti}. In the case of ModeRegression, linear outputs are used. In the case of ModeMulti, a softmax output layer is applied. Default applies the activation defined above as per usual.*/
+	Mode: ModeDefault,
+	/* Weight initializers: {deep.NewNormal(stdDev, mean), deep.NewUniform(stdDev, mean)} */
+	Weight: deep.NewNormal(1.0, 0.0),
+	/* Error metric in cross validated training */
+	Error: deep.MSE,
+	/* Bias node constant - 0 disables */
+	Bias: 1,
 })
 ```
 Train!
@@ -50,3 +69,6 @@ And make some predictions:
 n.Feed(data[i].Input[0]) => [0.0058055785217672636]
 n.Feed(data[i].Input[5]) => [0.9936341906634203]
 ```
+
+## Examples
+See ```train_test.go``` for other toy examples of regression, multi-class classification, binary classification, et cetera.
