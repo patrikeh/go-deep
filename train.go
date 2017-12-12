@@ -98,9 +98,9 @@ func (n *Neural) Back(ideal []float64, lr, lambda float64) {
 
 	for i, l := range n.Layers {
 		for j, n := range l.Neurons {
-			for _, s := range n.In {
-				s.Weight += lr * errors[i][j] * s.In
-				s.Weight -= s.Weight * lr * lambda // L2 regularization lambda in (0,1)
+			for k := range n.In {
+				n.In[k].Weight -= n.In[k].Weight * lr * lambda // L2 regularization lambda in (0,1)
+				n.In[k].Weight += lr * errors[i][j] * n.In[k].In
 			}
 		}
 	}

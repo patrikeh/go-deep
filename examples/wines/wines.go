@@ -16,41 +16,34 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	// Read data -- encode features as one hot vectors
 	data, err := load("./wine.data")
 	if err != nil {
 		panic(err)
 	}
 
 	for i := range data {
-		deep.Standardize(data[i].Input)
+		deep.Normalize(data[i].Input)
 	}
 	data.Shuffle()
 
-	/*
-		for i := range data {
-			deep.Normalize(data[i].Input)
-		}
-	*/
 	fmt.Printf("have %d entries\n", len(data))
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(data[0].Input),
-		Layout:     []int{5, 5, 3},
+		Layout:     []int{4, 3},
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(0.01, 0),
-		Bias:       0,
+		Weight:     deep.NewUniform(0.5, 0),
+		Bias:       1,
 		Error:      deep.MSE,
 	})
 
 	train, val := data.Split(0.65)
-	neural.TrainWithCrossValidation(train, val, 20000, 30, 0.01, 0.0001)
-	println(neural.String())
+	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.01, 0.001)
+
 	correct := 0
 	for _, d := range data {
 		est := neural.Forward(d.Input)
-		fmt.Printf("%+v\n", est)
 		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
 			correct++
 		}

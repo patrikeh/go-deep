@@ -1,7 +1,6 @@
 package deep
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"testing"
@@ -36,24 +35,23 @@ func Test_BoundedRegression(t *testing.T) {
 func Test_RegressionLinearOuts(t *testing.T) {
 	rand.Seed(0)
 	squares := Examples{}
-	for i := 0.0; i < 500.0; i++ {
+	for i := 0.0; i < 100.0; i++ {
 		squares = append(squares, Example{Input: []float64{i}, Response: []float64{math.Sqrt(i)}})
 	}
 	n := NewNeural(&Config{
 		Inputs:     1,
-		Layout:     []int{4, 4, 1},
+		Layout:     []int{3, 3, 1},
 		Activation: ActivationReLU,
 		Mode:       ModeRegression,
 		Weight:     NewNormal(1, 0),
-		Bias:       0,
+		Bias:       1,
 	})
 
-	n.Train(squares, 5000, 0.01, 0.0001)
+	n.Train(squares, 5000, 0.0001, 0.0001)
 
 	for i := 0; i < 20; i++ {
-		x := float64(rand.Intn(500))
-		fmt.Printf("want %.2f have %.2f\n", math.Sqrt(x), n.Forward([]float64{x})[0])
-		assert.InEpsilon(t, math.Sqrt(x), n.Forward([]float64{x})[0], 0.1)
+		x := float64(rand.Intn(100)) + 1
+		assert.InEpsilon(t, math.Sqrt(x)+1, n.Forward([]float64{x})[0]+1, 0.1)
 	}
 }
 
@@ -162,7 +160,7 @@ func Test_MultiClass(t *testing.T) {
 		Bias:       1,
 	})
 
-	n.TrainWithCrossValidation(data, data, 1000, 10, 0.01, 0.0001)
+	n.TrainWithCrossValidation(data, data, 1000, 0, 0.01, 0.0001)
 
 	for _, d := range data {
 		est := n.Forward(d.Input)
