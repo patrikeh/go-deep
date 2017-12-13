@@ -51,7 +51,7 @@ Train!
 ```go
 n.Train(data, 1000, 0.5, 0) // Data, iterations, learning rate, L2 regularization parameter (gamma)
 ```
-Or with cross-validation, printing error at every 10th interval:
+Or with cross-validation, printing error at every 10:th epoch:
 ```go
 training, heldout := data.Split(0.5)
 n.TrainWithCrossValidation(training, heldout, 1000, 10, 0.5, 0)
