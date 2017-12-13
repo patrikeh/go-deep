@@ -66,4 +66,6 @@ n.Feed(data[i].Input[5]) => [0.9936341906634203]
 ```
 
 ## Examples
-See ```train_test.go``` for other toy examples of regression, multi-class classification, binary classification, et cetera.
+See ```train_test.go``` for a variety of toy examples of regression, multi-class classification, binary classification, et cetera.
+
+See ```/examples``` for more realistic examples (currently the classic wine dataset).
