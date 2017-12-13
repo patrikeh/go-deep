@@ -31,19 +31,18 @@ func main() {
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(data[0].Input),
 		Layout:     []int{4, 3},
-		Activation: deep.ActivationReLU,
+		Activation: deep.ActivationSigmoid,
 		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(0.5, 0),
-		Bias:       1,
+		Weight:     deep.NewUniform(1.0, 0),
 		Error:      deep.MSE,
 	})
 
 	train, val := data.Split(0.65)
-	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.01, 0.001)
+	neural.TrainWithCrossValidation(train, val, 8000, 50, 0.1, 0.0001)
 
 	correct := 0
 	for _, d := range data {
-		est := neural.Forward(d.Input)
+		est := neural.Predict(d.Input)
 		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
 			correct++
 		}
@@ -52,6 +51,46 @@ func main() {
 	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(data)))
 }
 
+/*
+func main() {
+	rand.Seed(time.Now().UnixNano())
+
+	data, err := load("./wine.data")
+	if err != nil {
+		panic(err)
+	}
+
+	for i := range data {
+		deep.Normalize(data[i].Input)
+	}
+	data.Shuffle()
+
+	fmt.Printf("have %d entries\n", len(data))
+
+	neural := deep.NewNeural(&deep.Config{
+		Inputs:     len(data[0].Input),
+		Layout:     []int{4, 3},
+		Activation: deep.ActivationReLU,
+		Mode:       deep.ModeMulti,
+		Weight:     deep.NewUniform(0.7, 0),
+		Bias:       1,
+		Error:      deep.MSE,
+	})
+
+	train, val := data.Split(0.65)
+	neural.TrainWithCrossValidation(train, val, 12000, 50, 0.01, 0.000001)
+
+	correct := 0
+	for _, d := range data {
+		est := neural.Predict(d.Input)
+		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
+			correct++
+		}
+		fmt.Printf("want: %d guess: %d\n", deep.ArgMax(d.Response), deep.ArgMax(est))
+	}
+	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(data)))
+}
+*/
 func load(path string) (deep.Examples, error) {
 	f, err := os.Open(path)
 	defer f.Close()

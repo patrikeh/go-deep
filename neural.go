@@ -51,12 +51,15 @@ func NewNeural(c *Config) *Neural {
 		}
 	}
 
-	biases := make([][]*Synapse, len(layers))
-	for i := 0; i < len(layers); i++ {
-		if c.Mode == ModeRegression && i == len(layers)-1 {
-			continue
+	var biases [][]*Synapse
+	if c.Bias > 0 {
+		biases = make([][]*Synapse, len(layers))
+		for i := 0; i < len(layers); i++ {
+			if c.Mode == ModeRegression && i == len(layers)-1 {
+				continue
+			}
+			biases[i] = layers[i].ApplyBias(c.Weight)
 		}
-		biases[i] = layers[i].ApplyBias(c.Weight)
 	}
 
 	return &Neural{
@@ -78,18 +81,23 @@ func (n *Neural) Fire() {
 }
 
 func (n *Neural) set(input []float64) {
+	if len(input) != n.Config.Inputs {
+		glog.Errorf("Invalid input dimension - expected: %d got: %d", n.Config.Inputs, len(input))
+	}
 	for _, n := range n.Layers[0].Neurons {
-		if len(n.In)-1 != len(input) {
-			glog.Errorf("Invalid input dimension - expected: %d got: %d", len(n.In)-1, len(input))
-		}
 		for i := 0; i < len(input); i++ {
 			n.In[i].Fire(input[i])
 		}
 	}
 }
-func (n *Neural) Forward(input []float64) []float64 {
+
+func (n *Neural) Forward(input []float64) {
 	n.set(input)
 	n.Fire()
+}
+
+func (n *Neural) Predict(input []float64) []float64 {
+	n.Forward(input)
 
 	outLayer := n.Layers[len(n.Layers)-1]
 	out := make([]float64, len(outLayer.Neurons))

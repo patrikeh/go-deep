@@ -53,7 +53,7 @@ func (n *Neural) TrainWithCrossValidation(examples, validation Examples, iterati
 func (n *Neural) CrossValidate(validation Examples) float64 {
 	predictions, responses := make([][]float64, len(validation)), make([][]float64, len(validation))
 	for i := 0; i < len(validation); i++ {
-		predictions[i] = n.Forward(validation[i].Input)
+		predictions[i] = n.Predict(validation[i].Input)
 		responses[i] = validation[i].Response
 	}
 	return n.Config.Error(responses, predictions)
@@ -99,8 +99,7 @@ func (n *Neural) Back(ideal []float64, lr, lambda float64) {
 	for i, l := range n.Layers {
 		for j, n := range l.Neurons {
 			for k := range n.In {
-				n.In[k].Weight -= n.In[k].Weight * lr * lambda // L2 regularization lambda in (0,1)
-				n.In[k].Weight += lr * errors[i][j] * n.In[k].In
+				n.In[k].Weight += lr*errors[i][j]*n.In[k].In - n.In[k].Weight*lr*lambda // Weight decay controlled by lambda
 			}
 		}
 	}

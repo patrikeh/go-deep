@@ -28,7 +28,7 @@ func Test_BoundedRegression(t *testing.T) {
 
 	tests := []float64{0.0, 0.1, 0.5, 0.75, 0.9}
 	for _, x := range tests {
-		assert.InEpsilon(t, math.Pow(x, 2)+1, n.Forward([]float64{x})[0]+1, 0.1)
+		assert.InEpsilon(t, math.Pow(x, 2)+1, n.Predict([]float64{x})[0]+1, 0.1)
 	}
 }
 
@@ -51,7 +51,7 @@ func Test_RegressionLinearOuts(t *testing.T) {
 
 	for i := 0; i < 20; i++ {
 		x := float64(rand.Intn(100)) + 1
-		assert.InEpsilon(t, math.Sqrt(x)+1, n.Forward([]float64{x})[0]+1, 0.1)
+		assert.InEpsilon(t, math.Sqrt(x)+1, n.Predict([]float64{x})[0]+1, 0.1)
 	}
 }
 
@@ -80,9 +80,9 @@ func Test_Training(t *testing.T) {
 		}
 	}
 
-	v := n.Forward([]float64{0})
+	v := n.Predict([]float64{0})
 	assert.InEpsilon(t, 1, 1+v[0], 0.1)
-	v = n.Forward([]float64{5})
+	v = n.Predict([]float64{5})
 	assert.InEpsilon(t, 1.0, v[0], 0.1)
 }
 
@@ -113,7 +113,7 @@ func Test_Prediction(t *testing.T) {
 	n.Train(data, 5000, 0.5, 0)
 
 	for _, d := range data {
-		assert.InEpsilon(t, n.Forward(d.Input)[0]+1, d.Response[0]+1, 0.1)
+		assert.InEpsilon(t, n.Predict(d.Input)[0]+1, d.Response[0]+1, 0.1)
 	}
 }
 
@@ -131,7 +131,7 @@ func Test_CrossVal(t *testing.T) {
 	n.TrainWithCrossValidation(data, data, 1000, 0, 0.5, 0.0001)
 
 	for _, d := range data {
-		assert.InEpsilon(t, n.Forward(d.Input)[0]+1, d.Response[0]+1, 0.1)
+		assert.InEpsilon(t, n.Predict(d.Input)[0]+1, d.Response[0]+1, 0.1)
 		assert.InEpsilon(t, 1, n.CrossValidate(data)+1, 0.01)
 	}
 }
@@ -163,14 +163,37 @@ func Test_MultiClass(t *testing.T) {
 	n.TrainWithCrossValidation(data, data, 1000, 0, 0.01, 0.0001)
 
 	for _, d := range data {
-		est := n.Forward(d.Input)
+		est := n.Predict(d.Input)
 		assert.InEpsilon(t, 1.0, Sum(est), 0.00001)
 		if d.Response[0] == 1.0 {
-			assert.InEpsilon(t, n.Forward(d.Input)[0]+1, d.Response[0]+1, 0.1)
+			assert.InEpsilon(t, n.Predict(d.Input)[0]+1, d.Response[0]+1, 0.1)
 		} else {
-			assert.InEpsilon(t, n.Forward(d.Input)[1]+1, d.Response[1]+1, 0.1)
+			assert.InEpsilon(t, n.Predict(d.Input)[1]+1, d.Response[1]+1, 0.1)
 		}
 		assert.InEpsilon(t, 1, n.CrossValidate(data)+1, 0.01)
 	}
 
+}
+
+func Test_xor(t *testing.T) {
+	rand.Seed(0)
+	n := NewNeural(&Config{
+		Inputs:     2,
+		Layout:     []int{2, 1}, // Should be sufficient for modeling (AND+OR)
+		Activation: ActivationSigmoid,
+		Weight:     NewUniform(1, 0),
+		Bias:       1,
+	})
+	permutations := Examples{
+		{[]float64{0, 0}, []float64{0}},
+		{[]float64{1, 0}, []float64{1}},
+		{[]float64{0, 1}, []float64{1}},
+		{[]float64{1, 1}, []float64{0}},
+	}
+
+	n.Train(permutations, 1000, 0.9, 0.0001)
+
+	for _, perm := range permutations {
+		assert.InEpsilon(t, n.Predict(perm.Input)[0]+1, perm.Response[0]+1, 0.2)
+	}
 }

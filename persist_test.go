@@ -32,7 +32,7 @@ func Test_RestoreFromDump(t *testing.T) {
 		}
 	}
 
-	v := n.Forward([]float64{0})
+	v := n.Predict([]float64{0})
 	assert.InEpsilon(t, 1, 1+v[0], 0.1)
 
 	dump := n.Dump()
@@ -45,7 +45,7 @@ func Test_RestoreFromDump(t *testing.T) {
 		}
 	}
 	assert.Equal(t, n.String(), new.String())
-	assert.Equal(t, n.Forward([]float64{0}), new.Forward([]float64{0}))
+	assert.Equal(t, n.Predict([]float64{0}), new.Predict([]float64{0}))
 }
 
 func Test_Marshal(t *testing.T) {
@@ -73,7 +73,7 @@ func Test_Marshal(t *testing.T) {
 		}
 	}
 
-	v := n.Forward([]float64{0})
+	v := n.Predict([]float64{0})
 	assert.InEpsilon(t, 1, 1+v[0], 0.1)
 
 	dump, err := n.Marshal()
@@ -88,5 +88,5 @@ func Test_Marshal(t *testing.T) {
 		}
 	}
 	assert.Equal(t, n.String(), new.String())
-	assert.Equal(t, n.Forward([]float64{0}), new.Forward([]float64{0}))
+	assert.Equal(t, n.Predict([]float64{0}), new.Predict([]float64{0}))
 }
