@@ -2,14 +2,6 @@
 Feed forward/backpropagation neural network implementation. Currently supports:
 - Bias nodes
 - L2 regularization
-<<<<<<< HEAD
-- Modular activation functions (currently hyperbolic, sigmoid, leaky ReLU, linear)
-- Cross-validated training
-
-Todo:
-- Dropout
-- Softmax for multi-class classification problems
-=======
 - Modular activation functions (sigmoid, hyperbolic, ReLU)
 - Classification modes: Regression (linear output), Multiclass (softmax output)
 - Cross-validated training
@@ -19,7 +11,7 @@ Networks are modeled as a set of neurons connected through synapses. Consequentl
 Todo:
 - Dropout
 - Automated parameter tuning, momentum
->>>>>>> add modes regression, multiclass, binary; testing; wine example
+- Other learning techniques
 
 ## Usage
 Define some data...
