@@ -37,7 +37,10 @@ n := deep.NewNeural(&deep.Config{
 	Layout: []int{2, 2, 1},
 	/* Activation functions, available options are {deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear} */
 	Activation: deep.Sigmoid,
-	/* Determines output layer activation: {ModeDefault, ModeRegression, ModeMulti}. In the case of ModeRegression, linear outputs are used. In the case of ModeMulti, a softmax output layer is applied. Default applies the activation defined above as per usual.*/
+	/* Determines output layer activation: {ModeDefault, ModeRegression, ModeMulti}. 
+	In the case of ModeRegression, linear outputs are used. 
+	In the case of ModeMulti, a softmax output layer is applied.
+	Default applies the activation defined above as per usual.*/
 	Mode: ModeDefault,
 	/* Weight initializers: {deep.NewNormal(stdDev, mean), deep.NewUniform(stdDev, mean)} */
 	Weight: deep.NewNormal(1.0, 0.0),
