@@ -4,13 +4,14 @@ Feed forward/backpropagation neural network implementation. Currently supports:
 - L2 regularization
 - Modular activation functions (sigmoid, hyperbolic, ReLU)
 - Classification modes: Regression (linear output), Multiclass (softmax output)
+- Momentum
 - Cross-validated training
 
 Networks are modeled as a set of neurons connected through synapses. Consequently not the fastest implementation, but hopefully an intuitive one.
 
 Todo:
 - Dropout
-- Automated parameter tuning, momentum
+- Minibatches
 - Other learning techniques
 
 ## Usage
@@ -57,7 +58,7 @@ n.Train(data, 1000, 0.5, 0, 0.1) // data, iterations, learning rate, regularizat
 Or with cross-validation, printing error at every 10:th epoch:
 ```go
 training, heldout := data.Split(0.5)
-n.TrainWithCrossValidation(training, heldout, 1000, 10, 0.5, 0)
+n.TrainWithCrossValidation(training, heldout, 1000, 10, 0.5, 0, 0.1)
 ```
 And make some predictions:
 ```go
@@ -72,5 +73,5 @@ See ```examples/``` for realistic examples:
 
 | Dataset | Topology | Epochs | Accuracy |
 | --- | --- | --- | --- |
-| wines | [100] | 10000 | ~96% |
-| mnist | [5 5] | 50 | ~94% |
+| wines | [5 5] | 10000 | ~96% |
+| mnist | [100] | 50 | ~94% |
