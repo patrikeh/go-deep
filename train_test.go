@@ -69,7 +69,7 @@ func Test_Training(t *testing.T) {
 
 	n := NewNeural(&Config{
 		Inputs:     1,
-		Layout:     []int{1, 1},
+		Layout:     []int{5, 1},
 		Activation: ActivationSigmoid,
 		Weight:     NewUniform(0.5, 0),
 		Bias:       1,

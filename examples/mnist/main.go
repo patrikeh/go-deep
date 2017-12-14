@@ -46,7 +46,7 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(train[0].Input),
-		Layout:     []int{100, 10},
+		Layout:     []int{30, 10},
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMulti,
 		Weight:     deep.NewNormal(1, 0.01), // slight positive bias helps ReLU
@@ -57,7 +57,7 @@ func main() {
 	train, val := train.Split(0.9)
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(val), len(test))
 
-	neural.TrainWithCrossValidation(train, val, 50, 1, 0.001, 0.00001, 0.1)
+	neural.TrainWithCrossValidation(train, val, 50, 1, 0.001, 0.00001, 0.5)
 
 	correct := 0
 	for _, d := range test {

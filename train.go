@@ -92,11 +92,13 @@ func (n *Neural) Back(ideal []float64, lr, lambda, momentum float64) {
 	}
 
 	for i, l := range n.Layers {
+		idx := 0
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
 				delta := lr*n.t.deltas[i][j]*l.Neurons[j].In[k].In - l.Neurons[j].In[k].Weight*lr*lambda
-				l.Neurons[j].In[k].Weight -= (delta + momentum*n.t.oldDeltas[i][k])
-				n.t.oldDeltas[i][k] = delta
+				l.Neurons[j].In[k].Weight -= (delta + momentum*n.t.oldDeltas[i][idx])
+				n.t.oldDeltas[i][idx] = delta
+				idx++
 			}
 		}
 	}
