@@ -1,1 +1,5 @@
 /vendor/*
+/examples/wines/wines
+/examples/mnist/mnist
+/examples/mnist/mnist_test.data
+/examples/mnist/mnist_train.data

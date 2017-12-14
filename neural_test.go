@@ -12,7 +12,7 @@ func Test_Init(t *testing.T) {
 		Layout:     []int{4, 4, 2},
 		Activation: ActivationTanh,
 		Weight:     NewUniform(0.5, 0),
-		Bias:       0,
+		Bias:       1,
 	})
 
 	assert.Len(t, n.Layers, len(n.Config.Layout))
@@ -62,7 +62,7 @@ func Test_Sanity(t *testing.T) {
 		}
 	}
 
-	n.Forward([]float64{0.1, 0.2, 0.7})
+	n.Predict([]float64{0.1, 0.2, 0.7})
 
 	expected := [][]float64{
 		[]float64{1.3, 1.66, 1.72},

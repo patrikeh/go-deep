@@ -54,11 +54,11 @@ type Activation interface {
 
 type Sigmoid struct{}
 
-func (a Sigmoid) f(x float64) float64  { return Logistic(x, 1) }
-func (a Sigmoid) df(y float64) float64 { return y * (1 - y) }
+func (a Sigmoid) f(x float64) float64  { return Logistic(x, 1.0) }
+func (a Sigmoid) df(y float64) float64 { return y * (1.0 - y) }
 
 func Logistic(x, a float64) float64 {
-	return 1 / (1 + math.Exp(-a*x))
+	return 1.0 / (1.0 + math.Exp(-a*x))
 }
 
 type Tanh struct{}

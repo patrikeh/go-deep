@@ -21,7 +21,7 @@ func Test_BoundedRegression(t *testing.T) {
 		Activation: ActivationSigmoid,
 		Weight:     NewUniform(0.5, 0),
 		Error:      MSE,
-		Bias:       1,
+		Bias:       0,
 	})
 
 	n.Train(squares, 1000, 0.1, 0)
@@ -38,19 +38,20 @@ func Test_RegressionLinearOuts(t *testing.T) {
 	for i := 0.0; i < 100.0; i++ {
 		squares = append(squares, Example{Input: []float64{i}, Response: []float64{math.Sqrt(i)}})
 	}
+	squares.Shuffle()
 	n := NewNeural(&Config{
 		Inputs:     1,
 		Layout:     []int{3, 3, 1},
 		Activation: ActivationReLU,
 		Mode:       ModeRegression,
-		Weight:     NewNormal(1, 0),
+		Weight:     NewNormal(0.5, 0.5),
 		Bias:       1,
 	})
 
-	n.Train(squares, 5000, 0.0001, 0.0001)
+	n.Train(squares, 15000, 0.001, 0)
 
 	for i := 0; i < 20; i++ {
-		x := float64(rand.Intn(100)) + 1
+		x := float64(rand.Intn(99) + 1)
 		assert.InEpsilon(t, math.Sqrt(x)+1, n.Predict([]float64{x})[0]+1, 0.1)
 	}
 }
@@ -118,7 +119,6 @@ func Test_Prediction(t *testing.T) {
 }
 
 func Test_CrossVal(t *testing.T) {
-
 	n := NewNeural(&Config{
 		Inputs:     2,
 		Layout:     []int{1, 1},
@@ -181,7 +181,7 @@ func Test_xor(t *testing.T) {
 		Inputs:     2,
 		Layout:     []int{2, 1}, // Should be sufficient for modeling (AND+OR)
 		Activation: ActivationSigmoid,
-		Weight:     NewUniform(1, 0),
+		Weight:     NewUniform(.25, 0),
 		Bias:       1,
 	})
 	permutations := Examples{

@@ -5,7 +5,6 @@ import "math"
 type ErrorMeasure func(estimate, actual [][]float64) float64
 
 func MSE(estimate, actual [][]float64) float64 {
-
 	var sum float64
 	for i := 0; i < len(estimate); i++ {
 		for j := 0; j < len(estimate[i]); j++ {

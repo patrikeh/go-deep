@@ -10,45 +10,65 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/patrikeh/go-deep"
+	deep "github.com/patrikeh/go-deep"
 )
 
+/*
+	mnist classifier
+	mnist is a set of hand-written digits 0-9
+	the dataset in a sane format (as used here) can be found at:
+	https://pjreddie.com/projects/mnist-in-csv/
+*/
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	data, err := load("./wine.data")
+	train, err := load("./mnist_train.data")
+	if err != nil {
+		panic(err)
+	}
+	test, err := load("./mnist_test.data")
 	if err != nil {
 		panic(err)
 	}
 
-	for i := range data {
-		deep.Normalize(data[i].Input)
+	for i := range train {
+		for j := range train[i].Input {
+			train[i].Input[j] = train[i].Input[j] / 255
+		}
 	}
-	data.Shuffle()
-
-	fmt.Printf("have %d entries\n", len(data))
+	for i := range test {
+		for j := range train[i].Input {
+			train[i].Input[j] = train[i].Input[j] / 255
+		}
+	}
+	test.Shuffle()
+	train.Shuffle()
 
 	neural := deep.NewNeural(&deep.Config{
-		Inputs:     len(data[0].Input),
-		Layout:     []int{4, 3},
-		Activation: deep.ActivationSigmoid,
+		Inputs:     len(train[0].Input),
+		Layout:     []int{100, 10},
+		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(.25, 0),
+		Weight:     deep.NewNormal(1, 0.01), // slight positive bias helps ReLU
 		Error:      deep.MSE,
+		Bias:       1,
 	})
 
-	train, val := data.Split(0.65)
-	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.1, 0.00001)
+	train, val := train.Split(0.9)
+	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(val), len(test))
+
+	neural.TrainWithCrossValidation(train, val, 50, 1, 0.001, 0.00001)
 
 	correct := 0
-	for _, d := range data {
+	for _, d := range test {
 		est := neural.Predict(d.Input)
 		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
 			correct++
 		}
 		fmt.Printf("want: %d guess: %d\n", deep.ArgMax(d.Response), deep.ArgMax(est))
 	}
-	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(data)))
+	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(test)))
+
 }
 
 func load(path string) (deep.Examples, error) {
@@ -76,7 +96,7 @@ func toExample(in []string) deep.Example {
 	if err != nil {
 		panic(err)
 	}
-	resEncoded := onehot(3, res)
+	resEncoded := onehot(10, res)
 	var features []float64
 	for i := 1; i < len(in); i++ {
 		res, err := strconv.ParseFloat(in[i], 64)
@@ -94,6 +114,6 @@ func toExample(in []string) deep.Example {
 
 func onehot(classes int, val float64) []float64 {
 	res := make([]float64, classes)
-	res[int(val)-1] = 1
+	res[int(val)] = 1
 	return res
 }

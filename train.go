@@ -33,7 +33,6 @@ func (e Examples) Split(p float64) (first, second Examples) {
 
 func (n *Neural) Train(examples Examples, epochs int, lr, lambda float64) {
 	for i := 0; i < epochs; i++ {
-		examples.Shuffle()
 		for j := 0; j < len(examples); j++ {
 			n.Learn(examples[j], lr, lambda)
 		}
