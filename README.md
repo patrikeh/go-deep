@@ -52,7 +52,7 @@ n := deep.NewNeural(&deep.Config{
 ```
 Train!
 ```go
-n.Train(data, 1000, 0.5, 0) // Data, iterations, learning rate, L2 regularization parameter (gamma)
+n.Train(data, 1000, 0.5, 0, 0.1) // data, iterations, learning rate, regularization, momentum
 ```
 Or with cross-validation, printing error at every 10:th epoch:
 ```go

@@ -57,7 +57,7 @@ func main() {
 	train, val := train.Split(0.9)
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(val), len(test))
 
-	neural.TrainWithCrossValidation(train, val, 50, 1, 0.001, 0.00001)
+	neural.TrainWithCrossValidation(train, val, 50, 1, 0.001, 0.00001, 0.1)
 
 	correct := 0
 	for _, d := range test {

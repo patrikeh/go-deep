@@ -24,7 +24,7 @@ func Test_BoundedRegression(t *testing.T) {
 		Bias:       0,
 	})
 
-	n.Train(squares, 1000, 0.1, 0)
+	n.Train(squares, 1000, 0.1, 0, 0.1)
 
 	tests := []float64{0.0, 0.1, 0.5, 0.75, 0.9}
 	for _, x := range tests {
@@ -48,7 +48,7 @@ func Test_RegressionLinearOuts(t *testing.T) {
 		Bias:       1,
 	})
 
-	n.Train(squares, 15000, 0.001, 0)
+	n.Train(squares, 15000, 0.001, 0, 0.1)
 
 	for i := 0; i < 20; i++ {
 		x := float64(rand.Intn(99) + 1)
@@ -77,7 +77,7 @@ func Test_Training(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		for _, data := range data {
-			n.Learn(data, 0.5, 0)
+			n.Learn(data, 0.5, 0, 0.1)
 		}
 	}
 
@@ -111,7 +111,7 @@ func Test_Prediction(t *testing.T) {
 		Bias:       1,
 	})
 
-	n.Train(data, 5000, 0.5, 0)
+	n.Train(data, 5000, 0.5, 0, 0.1)
 
 	for _, d := range data {
 		assert.InEpsilon(t, n.Predict(d.Input)[0]+1, d.Response[0]+1, 0.1)
@@ -128,7 +128,7 @@ func Test_CrossVal(t *testing.T) {
 		Bias:       1,
 	})
 
-	n.TrainWithCrossValidation(data, data, 1000, 0, 0.5, 0.0001)
+	n.TrainWithCrossValidation(data, data, 1000, 0, 0.5, 0.0001, 0.1)
 
 	for _, d := range data {
 		assert.InEpsilon(t, n.Predict(d.Input)[0]+1, d.Response[0]+1, 0.1)
@@ -160,7 +160,7 @@ func Test_MultiClass(t *testing.T) {
 		Bias:       1,
 	})
 
-	n.TrainWithCrossValidation(data, data, 1000, 0, 0.01, 0.0001)
+	n.TrainWithCrossValidation(data, data, 1000, 0, 0.01, 0.0001, 0.1)
 
 	for _, d := range data {
 		est := n.Predict(d.Input)
@@ -191,7 +191,7 @@ func Test_xor(t *testing.T) {
 		{[]float64{1, 1}, []float64{0}},
 	}
 
-	n.Train(permutations, 1000, 0.9, 0.0001)
+	n.Train(permutations, 1000, 0.9, 0.0001, 0.1)
 
 	for _, perm := range permutations {
 		assert.InEpsilon(t, n.Predict(perm.Input)[0]+1, perm.Response[0]+1, 0.2)

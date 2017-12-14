@@ -10,6 +10,12 @@ type Neural struct {
 	Layers []*Layer
 	Biases [][]*Synapse
 	Config *Config
+	t      *Training
+}
+
+type Training struct {
+	deltas    [][]float64
+	oldDeltas [][]float64
 }
 
 type Config struct {
@@ -66,6 +72,20 @@ func NewNeural(c *Config) *Neural {
 		Layers: layers,
 		Biases: biases,
 		Config: c,
+		t:      getTraining(layers),
+	}
+}
+
+func getTraining(layers []*Layer) *Training {
+	deltas := make([][]float64, len(layers))
+	oldDeltas := make([][]float64, len(layers))
+	for i, l := range layers {
+		deltas[i] = make([]float64, len(l.Neurons))
+		oldDeltas[i] = make([]float64, len(l.Neurons)*len(l.Neurons[0].In))
+	}
+	return &Training{
+		deltas:    deltas,
+		oldDeltas: oldDeltas,
 	}
 }
 

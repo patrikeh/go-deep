@@ -38,7 +38,7 @@ func main() {
 	})
 
 	train, val := data.Split(0.65)
-	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.1, 0.00001)
+	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.1, 0.00001, 0.5)
 
 	correct := 0
 	for _, d := range data {

@@ -28,7 +28,7 @@ func Test_RestoreFromDump(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		for _, data := range data {
-			n.Learn(data, 0.5, 0)
+			n.Learn(data, 0.5, 0, 0)
 		}
 	}
 
@@ -69,7 +69,7 @@ func Test_Marshal(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		for _, data := range data {
-			n.Learn(data, 0.5, 0)
+			n.Learn(data, 0.5, 0, 0)
 		}
 	}
 
