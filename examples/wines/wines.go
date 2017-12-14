@@ -31,14 +31,14 @@ func main() {
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(data[0].Input),
 		Layout:     []int{4, 3},
-		Activation: deep.ActivationSigmoid,
+		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(.25, 0),
+		Weight:     deep.NewUniform(.25, 0.2),
 		Error:      deep.MSE,
 	})
 
 	train, val := data.Split(0.65)
-	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.1, 0.00001, 0.2)
+	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.01, 0.00001, 0.5)
 
 	correct := 0
 	for _, d := range data {

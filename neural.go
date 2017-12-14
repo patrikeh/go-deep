@@ -15,7 +15,7 @@ type Neural struct {
 
 type Training struct {
 	deltas    [][]float64
-	oldDeltas [][]float64
+	oldDeltas [][][]float64
 }
 
 type Config struct {
@@ -31,7 +31,11 @@ type Config struct {
 func NewNeural(c *Config) *Neural {
 
 	if c.Weight == nil {
-		c.Weight = NewUniform(0.5, 0)
+		mean := 0.0
+		if c.Activation == ActivationReLU {
+			mean = 0.1
+		}
+		c.Weight = NewUniform(0.5, mean)
 	}
 	if c.Activation == ActivationNone {
 		c.Activation = ActivationSigmoid
@@ -78,10 +82,13 @@ func NewNeural(c *Config) *Neural {
 
 func getTraining(layers []*Layer) *Training {
 	deltas := make([][]float64, len(layers))
-	oldDeltas := make([][]float64, len(layers))
+	oldDeltas := make([][][]float64, len(layers))
 	for i, l := range layers {
 		deltas[i] = make([]float64, len(l.Neurons))
-		oldDeltas[i] = make([]float64, len(l.Neurons)*len(l.Neurons[0].In))
+		oldDeltas[i] = make([][]float64, len(l.Neurons))
+		for j, n := range l.Neurons {
+			oldDeltas[i][j] = make([]float64, len(n.In))
+		}
 	}
 	return &Training{
 		deltas:    deltas,
