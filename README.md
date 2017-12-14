@@ -69,7 +69,8 @@ n.Feed(data[i].Input[5]) => [0.9936341906634203]
 See ```train_test.go``` for a variety of toy examples of regression, multi-class classification, binary classification, et cetera.
 
 See ```examples/``` for realistic examples:
-| Dataset | Epochs | Accuracy |
-| --- | --- | --- |
-| wines | 10000 |~96% |
-| mnist | 50 | ~92% |
+
+| Dataset | Topology | Epochs | Accuracy |
+| --- | --- | --- | --- |
+| wines | [100] | 10000 | ~96% |
+| mnist | [5 5] | 50 | ~94% |
