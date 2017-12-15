@@ -107,7 +107,7 @@ func (n *Neural) Fire() {
 	}
 }
 
-func (n *Neural) set(input []float64) {
+func (n *Neural) Forward(input []float64) {
 	if len(input) != n.Config.Inputs {
 		glog.Errorf("Invalid input dimension - expected: %d got: %d", n.Config.Inputs, len(input))
 	}
@@ -116,10 +116,6 @@ func (n *Neural) set(input []float64) {
 			n.In[i].Fire(input[i])
 		}
 	}
-}
-
-func (n *Neural) Forward(input []float64) {
-	n.set(input)
 	n.Fire()
 }
 

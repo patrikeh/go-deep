@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"time"
 )
 
 type Example struct {
@@ -41,10 +42,12 @@ func (n *Neural) Train(examples Examples, epochs int, lr, lambda, momentum float
 
 func (n *Neural) TrainWithCrossValidation(examples, validation Examples, iterations, xvi int, lr, reg, momentum float64) {
 	for i := 0; i < iterations; i++ {
+		ts := time.Now()
 		n.Train(examples, 1, lr, reg, momentum)
+		elapsed := time.Since(ts)
 		if xvi > 0 && i%xvi == 0 {
-			e := n.CrossValidate(examples)
-			fmt.Printf("Iteration %d | Error: %.5f\n", i, e)
+			rms := n.CrossValidate(examples)
+			fmt.Printf("Iteration %d | %s | Error: %.5f\n", i, elapsed.String(), rms)
 		}
 	}
 }
