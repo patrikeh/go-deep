@@ -83,4 +83,4 @@ See ```examples/``` for realistic examples:
 | Dataset | Topology | Epochs | Accuracy |
 | --- | --- | --- | --- |
 | wines | [5 5] | 10000 | ~96% |
-| mnist | [100] | 50 | ~94% |
+| mnist | [100] | 100 | ~95% |
