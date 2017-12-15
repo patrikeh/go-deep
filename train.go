@@ -34,7 +34,7 @@ func (e Examples) Split(p float64) (first, second Examples) {
 	return
 }
 
-func (n *Neural) Train(examples Examples, epochs int, lr, lambda, momentum float64) {
+func (n *Neural) train(examples Examples, epochs int, lr, lambda, momentum float64) {
 	for i := 0; i < epochs; i++ {
 		examples.Shuffle()
 		for j := 0; j < len(examples); j++ {
@@ -43,7 +43,7 @@ func (n *Neural) Train(examples Examples, epochs int, lr, lambda, momentum float
 	}
 }
 
-func (n *Neural) TrainWithCrossValidation(examples, validation Examples, iterations, xvi int, lr, reg, momentum float64) {
+func (n *Neural) Train(examples, validation Examples, iterations int, lr, lambda, momentum float64) {
 	train := make(Examples, len(examples))
 	copy(train, examples)
 
@@ -52,10 +52,10 @@ func (n *Neural) TrainWithCrossValidation(examples, validation Examples, iterati
 
 	ts := time.Now()
 	for i := 0; i < iterations; i++ {
-		n.Train(train, 1, lr, reg, momentum)
-		if xvi > 0 && i%xvi == 0 && len(validation) > 0 {
+		n.train(train, 1, lr, lambda, momentum)
+		if n.Config.Verbosity > 0 && i%n.Config.Verbosity == 0 && len(validation) > 0 {
 			rms := n.CrossValidate(validation)
-			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+xvi, time.Since(ts).String(), rms)
+			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+n.Config.Verbosity, time.Since(ts).String(), rms)
 			w.Flush()
 		}
 	}
@@ -72,7 +72,8 @@ func (n *Neural) CrossValidate(validation Examples) float64 {
 
 func (n *Neural) Learn(e Example, lr, lambda, momentum float64) {
 	n.Forward(e.Input)
-	n.Back(e.Response, lr, lambda/float64(len(e.Input)), momentum)
+	n.CalculateDeltas(e.Response)
+	n.Update(lr, lambda/float64(len(e.Input)), momentum)
 }
 
 func mse(estimate, actual []float64) float64 {
@@ -86,14 +87,12 @@ func mse(estimate, actual []float64) float64 {
 	return sum / float64(n)
 }
 
-func (n *Neural) Back(ideal []float64, lr, lambda, momentum float64) {
-	last := len(n.Layers) - 1
-
-	for i, neuron := range n.Layers[last].Neurons {
-		n.t.deltas[last][i] = Act(neuron.A).df(neuron.Value) * (neuron.Value - ideal[i])
+func (n *Neural) CalculateDeltas(ideal []float64) {
+	for i, neuron := range n.Layers[len(n.Layers)-1].Neurons {
+		n.t.deltas[len(n.Layers)-1][i] = Act(neuron.A).df(neuron.Value) * (neuron.Value - ideal[i])
 	}
 
-	for i := last - 1; i >= 0; i-- {
+	for i := len(n.Layers) - 2; i >= 0; i-- {
 		for j, neuron := range n.Layers[i].Neurons {
 			var sum float64
 			for k, s := range neuron.Out {
@@ -102,12 +101,14 @@ func (n *Neural) Back(ideal []float64, lr, lambda, momentum float64) {
 			n.t.deltas[i][j] = Act(neuron.A).df(neuron.Value) * sum
 		}
 	}
+}
 
+func (n *Neural) Update(lr, lambda, momentum float64) {
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
 				delta := lr*n.t.deltas[i][j]*l.Neurons[j].In[k].In - l.Neurons[j].In[k].Weight*lr*lambda
-				l.Neurons[j].In[k].Weight -= (delta + momentum*n.t.oldDeltas[i][j][k])
+				l.Neurons[j].In[k].Weight -= delta + momentum*n.t.oldDeltas[i][j][k]
 				n.t.oldDeltas[i][j][k] = delta
 			}
 		}

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	deep "github.com/patrikeh/go-deep"
-	"github.com/pkg/profile"
 )
 
 /*
@@ -56,9 +55,9 @@ func main() {
 	})
 
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
-	p := profile.Start()
-	neural.TrainWithCrossValidation(train, test, 1, 1, 0.001, 0.00001, 0.1)
-	p.Stop()
+	//p := profile.Start()
+	neural.TrainWithCrossValidation(train, test, 100, 1, 0.001, 0.00001, 0.1)
+	//p.Stop()
 
 	correct := 0
 	for _, d := range test {

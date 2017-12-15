@@ -9,7 +9,17 @@ type Dump struct {
 	Weights [][][]float64
 }
 
-func (n Neural) Dump() *Dump {
+func (n *Neural) ApplyWeights(weights [][][]float64) {
+	for i, l := range n.Layers {
+		for j := range l.Neurons {
+			for k := range l.Neurons[j].In {
+				n.Layers[i].Neurons[j].In[k].Weight = weights[i][j][k]
+			}
+		}
+	}
+}
+
+func (n Neural) Weights() [][][]float64 {
 	weights := make([][][]float64, len(n.Layers))
 	for i, l := range n.Layers {
 		weights[i] = make([][]float64, len(l.Neurons))
@@ -20,25 +30,21 @@ func (n Neural) Dump() *Dump {
 			}
 		}
 	}
+	return weights
+}
 
+func (n Neural) Dump() *Dump {
 	return &Dump{
 		Config:  n.Config,
-		Weights: weights,
+		Weights: n.Weights(),
 	}
 }
 
 func FromDump(dump *Dump) *Neural {
-	neural := NewNeural(dump.Config)
+	n := NewNeural(dump.Config)
+	n.ApplyWeights(dump.Weights)
 
-	for i, l := range neural.Layers {
-		for j, n := range l.Neurons {
-			for k := range n.In {
-				neural.Layers[i].Neurons[j].In[k].Weight = dump.Weights[i][j][k]
-			}
-		}
-	}
-
-	return neural
+	return n
 }
 
 func (n Neural) Marshal() ([]byte, error) {
