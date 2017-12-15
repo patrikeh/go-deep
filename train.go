@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
+	"text/tabwriter"
 	"time"
 )
 
@@ -15,7 +17,7 @@ type Example struct {
 type Examples []Example
 
 func (e Examples) Shuffle() {
-	for i := len(e) - 1; i >= 0; i-- {
+	for i := range e {
 		j := rand.Intn(i + 1)
 		e[i], e[j] = e[j], e[i]
 	}
@@ -34,6 +36,7 @@ func (e Examples) Split(p float64) (first, second Examples) {
 
 func (n *Neural) Train(examples Examples, epochs int, lr, lambda, momentum float64) {
 	for i := 0; i < epochs; i++ {
+		examples.Shuffle()
 		for j := 0; j < len(examples); j++ {
 			n.Learn(examples[j], lr, lambda, momentum)
 		}
@@ -41,13 +44,19 @@ func (n *Neural) Train(examples Examples, epochs int, lr, lambda, momentum float
 }
 
 func (n *Neural) TrainWithCrossValidation(examples, validation Examples, iterations, xvi int, lr, reg, momentum float64) {
+	train := make(Examples, len(examples))
+	copy(train, examples)
+
+	w := tabwriter.NewWriter(os.Stdout, 16, 0, 3, ' ', 0)
+	fmt.Fprint(w, "Epochs\tElapsed\tError\t\n---\t---\t---\t\n")
+
+	ts := time.Now()
 	for i := 0; i < iterations; i++ {
-		ts := time.Now()
-		n.Train(examples, 1, lr, reg, momentum)
-		elapsed := time.Since(ts)
-		if xvi > 0 && i%xvi == 0 {
-			rms := n.CrossValidate(examples)
-			fmt.Printf("Iteration %d | %s | Error: %.5f\n", i, elapsed.String(), rms)
+		n.Train(train, 1, lr, reg, momentum)
+		if xvi > 0 && i%xvi == 0 && len(validation) > 0 {
+			rms := n.CrossValidate(validation)
+			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+xvi, time.Since(ts).String(), rms)
+			w.Flush()
 		}
 	}
 }

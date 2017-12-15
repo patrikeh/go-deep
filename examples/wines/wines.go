@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+
 	rand.Seed(time.Now().UnixNano())
 
 	data, err := load("./wine.data")
@@ -30,15 +31,15 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(data[0].Input),
-		Layout:     []int{4, 3},
+		Layout:     []int{5, 5, 3},
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMulti,
 		Weight:     deep.NewUniform(.25, 0.2),
 		Error:      deep.MSE,
+		Bias:       1,
 	})
 
-	train, val := data.Split(0.65)
-	neural.TrainWithCrossValidation(train, val, 10000, 50, 0.01, 0.00001, 0.5)
+	neural.TrainWithCrossValidation(data, data, 10000, 50, 0.01, 0.00001, 0.5)
 
 	correct := 0
 	for _, d := range data {

@@ -48,7 +48,7 @@ func Test_RegressionLinearOuts(t *testing.T) {
 		Bias:       1,
 	})
 
-	n.Train(squares, 15000, 0.001, 0, 0.1)
+	n.Train(squares, 20000, 0.001, 0, 0.1)
 
 	for i := 0; i < 20; i++ {
 		x := float64(rand.Intn(99) + 1)
