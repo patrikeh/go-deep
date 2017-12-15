@@ -60,10 +60,19 @@ Or with cross-validation, printing error at every 10:th epoch:
 training, heldout := data.Split(0.5)
 n.TrainWithCrossValidation(training, heldout, 1000, 10, 0.5, 0, 0.1)
 ```
+```
+Epochs        Elapsed       Error         
+---           ---           ---           
+5             12.938µs      0.36438       
+10            125.691µs     0.02261       
+15            177.194µs     0.00404       
+...     
+1000          10.703839ms   0.00000       
+```
 And make some predictions:
 ```go
-n.Feed(data[i].Input[0]) => [0.0058055785217672636]
-n.Feed(data[i].Input[5]) => [0.9936341906634203]
+n.Predict(data[i].Input[0]) => [0.0058055785217672636]
+n.Predict(data[i].Input[5]) => [0.9936341906634203]
 ```
 
 ## Examples
