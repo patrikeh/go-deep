@@ -37,9 +37,10 @@ func main() {
 		Weight:     deep.NewUniform(.25, 0.2),
 		Error:      deep.MSE,
 		Bias:       1,
+		Verbosity:  50,
 	})
 
-	neural.TrainWithCrossValidation(data, data, 10000, 50, 0.01, 0.00001, 0.5)
+	neural.Train(data, data, 10000, 0.01, 0.00001, 0.5)
 
 	correct := 0
 	for _, d := range data {

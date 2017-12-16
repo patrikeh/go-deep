@@ -34,15 +34,6 @@ func (e Examples) Split(p float64) (first, second Examples) {
 	return
 }
 
-func (n *Neural) train(examples Examples, epochs int, lr, lambda, momentum float64) {
-	for i := 0; i < epochs; i++ {
-		examples.Shuffle()
-		for j := 0; j < len(examples); j++ {
-			n.Learn(examples[j], lr, lambda, momentum)
-		}
-	}
-}
-
 func (n *Neural) Train(examples, validation Examples, iterations int, lr, lambda, momentum float64) {
 	train := make(Examples, len(examples))
 	copy(train, examples)
@@ -57,6 +48,15 @@ func (n *Neural) Train(examples, validation Examples, iterations int, lr, lambda
 			rms := n.CrossValidate(validation)
 			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+n.Config.Verbosity, time.Since(ts).String(), rms)
 			w.Flush()
+		}
+	}
+}
+
+func (n *Neural) train(examples Examples, epochs int, lr, lambda, momentum float64) {
+	for i := 0; i < epochs; i++ {
+		examples.Shuffle()
+		for j := 0; j < len(examples); j++ {
+			n.Learn(examples[j], lr, lambda, momentum)
 		}
 	}
 }
