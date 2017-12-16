@@ -49,17 +49,17 @@ n := deep.NewNeural(&deep.Config{
 	Error: deep.MSE,
 	/* Bias node constant - 0 disables */
 	Bias: 1,
+	/* Print info at every n:th iteration */
+	Verbosity: 5,
 })
 ```
 Train!
 ```go
-n.Train(data, 1000, 0.5, 0, 0.1) // data, iterations, learning rate, regularization, momentum
-```
-Or with cross-validation, printing error at every 5:th epoch:
-```go
+
 training, heldout := data.Split(0.5)
-n.TrainWithCrossValidation(training, heldout, 1000, 10, 0.5, 0, 0.1)
+n.Train(data, heldout, 1000, 0.5, 0, 0.1) // data, iterations, learning rate, regularization, momentum
 ```
+resulting in:
 ```
 Epochs        Elapsed       Error         
 ---           ---           ---           
@@ -69,7 +69,7 @@ Epochs        Elapsed       Error
 ...     
 1000          10.703839ms   0.00000       
 ```
-And make some predictions:
+Finally, make some predictions:
 ```go
 n.Predict(data[i].Input[0]) => [0.0058055785217672636]
 n.Predict(data[i].Input[5]) => [0.9936341906634203]
