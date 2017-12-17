@@ -2,37 +2,10 @@ package deep
 
 import (
 	"fmt"
-	"math"
-	"math/rand"
 	"os"
 	"text/tabwriter"
 	"time"
 )
-
-type Example struct {
-	Input    []float64
-	Response []float64
-}
-
-type Examples []Example
-
-func (e Examples) Shuffle() {
-	for i := range e {
-		j := rand.Intn(i + 1)
-		e[i], e[j] = e[j], e[i]
-	}
-}
-
-func (e Examples) Split(p float64) (first, second Examples) {
-	for i := 0; i < len(e); i++ {
-		if p > rand.Float64() {
-			first = append(first, e[i])
-		} else {
-			second = append(second, e[i])
-		}
-	}
-	return
-}
 
 func (n *Neural) Train(examples, validation Examples, iterations int, lr, lambda, momentum float64) {
 	train := make(Examples, len(examples))
@@ -74,17 +47,6 @@ func (n *Neural) Learn(e Example, lr, lambda, momentum float64) {
 	n.Forward(e.Input)
 	n.CalculateDeltas(e.Response)
 	n.Update(lr, lambda/float64(len(e.Input)), momentum)
-}
-
-func mse(estimate, actual []float64) float64 {
-	n := len(estimate)
-
-	var sum float64
-	for i := 0; i < n; i++ {
-		sum += math.Pow(estimate[i]-actual[i], 2)
-	}
-
-	return sum / float64(n)
 }
 
 func (n *Neural) CalculateDeltas(ideal []float64) {
