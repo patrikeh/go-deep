@@ -51,7 +51,7 @@ func (n *Neural) Learn(e Example, lr, lambda, momentum float64) {
 
 func (n *Neural) CalculateDeltas(ideal []float64) {
 	for i, neuron := range n.Layers[len(n.Layers)-1].Neurons {
-		n.t.deltas[len(n.Layers)-1][i] = Act(neuron.A).df(neuron.Value) * (neuron.Value - ideal[i])
+		n.t.deltas[len(n.Layers)-1][i] = Act(neuron.A).df(neuron.Value) * (ideal[i] - neuron.Value)
 	}
 
 	for i := len(n.Layers) - 2; i >= 0; i-- {
@@ -70,7 +70,7 @@ func (n *Neural) Update(lr, lambda, momentum float64) {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
 				delta := lr*n.t.deltas[i][j]*l.Neurons[j].In[k].In - l.Neurons[j].In[k].Weight*lr*lambda
-				l.Neurons[j].In[k].Weight -= delta + momentum*n.t.oldDeltas[i][j][k]
+				l.Neurons[j].In[k].Weight += delta + momentum*n.t.oldDeltas[i][j][k]
 				n.t.oldDeltas[i][j][k] = delta
 			}
 		}
