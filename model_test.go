@@ -19,7 +19,7 @@ func Test_SplitN(t *testing.T) {
 		{[]float64{8.675418651, -0.242068655}, []float64{0, 1}},
 	}
 
-	batches := data.SplitN(2)
+	batches := data.SplitSize(2)
 	assert.Len(t, batches, 5)
 	for _, batch := range batches {
 		assert.True(t, len(batch) <= 2)
