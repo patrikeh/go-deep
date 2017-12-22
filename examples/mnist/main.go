@@ -11,6 +11,7 @@ import (
 	"time"
 
 	deep "github.com/patrikeh/go-deep"
+	"github.com/pkg/profile"
 )
 
 /*
@@ -46,7 +47,7 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(train[0].Input),
-		Layout:     []int{5, 5, 10},
+		Layout:     []int{50, 10},
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMulti,
 		Weight:     deep.NewNormal(0.6, 0.01), // slight positive bias helps ReLU
@@ -56,9 +57,10 @@ func main() {
 	})
 
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
-	//p := profile.Start()
-	neural.Train(train, test, 100, 0.001, 0.00001, 0.1)
-	//p.Stop()
+	p := profile.Start()
+	//neural.Train(train, test, 25, 0.001, 0.00001, 0.1)
+	neural.TrainM(train, test, 2, 8000, 4, 0.1, 0.0001, 0.1)
+	p.Stop()
 
 	correct := 0
 	for _, d := range test {
@@ -66,7 +68,6 @@ func main() {
 		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
 			correct++
 		}
-		fmt.Printf("want: %d guess: %d\n", deep.ArgMax(d.Response), deep.ArgMax(est))
 	}
 	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(test)))
 

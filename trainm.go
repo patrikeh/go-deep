@@ -44,7 +44,6 @@ func (n *Neural) TrainM(examples, validation Examples, iterations, batchSize, wo
 			}
 
 			wg.Wait()
-			// Summarize results and apply
 			for _, net := range nets {
 				for i := range net.Layers {
 					for j := range net.Layers[i].Neurons {

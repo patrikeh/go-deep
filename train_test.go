@@ -191,7 +191,7 @@ func Test_xor(t *testing.T) {
 		{[]float64{1, 1}, []float64{0}},
 	}
 
-	n.Train(permutations, nil, 1000, 0.9, 0.0001, 0.1)
+	n.Train(permutations, nil, 1000, 0.5, 0.0001, 0.1)
 
 	for _, perm := range permutations {
 		assert.InEpsilon(t, n.Predict(perm.Input)[0]+1, perm.Response[0]+1, 0.2)

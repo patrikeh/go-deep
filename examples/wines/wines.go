@@ -40,7 +40,7 @@ func main() {
 		Verbosity:  50,
 	})
 
-	train, heldout := data.Split(0.65) // 6.94, 7.39
+	train, heldout := data.Split(0.65)
 	neural.TrainM(train, heldout, 20000, 100, 4, 0.05, 0.001, 0.5)
 
 	correct := 0
