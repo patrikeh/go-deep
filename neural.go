@@ -10,13 +10,6 @@ type Neural struct {
 	Layers []*Layer
 	Biases [][]*Synapse
 	Config *Config
-	t      *training
-}
-
-type training struct {
-	deltas            [][]float64
-	accumulatedDeltas [][][]float64
-	oldDeltas         [][][]float64
 }
 
 type Config struct {
@@ -27,8 +20,6 @@ type Config struct {
 	Weight     WeightInitializer `json:"-"`
 	Error      ErrorMeasure      `json:"-"`
 	Bias       float64
-
-	Verbosity int
 }
 
 func NewNeural(c *Config) *Neural {
@@ -79,28 +70,6 @@ func NewNeural(c *Config) *Neural {
 		Layers: layers,
 		Biases: biases,
 		Config: c,
-		t:      newTraining(layers),
-	}
-}
-
-func newTraining(layers []*Layer) *training {
-	deltas := make([][]float64, len(layers))
-	oldDeltas := make([][][]float64, len(layers))
-	accumulatedDeltas := make([][][]float64, len(layers))
-
-	for i, l := range layers {
-		deltas[i] = make([]float64, len(l.Neurons))
-		oldDeltas[i] = make([][]float64, len(l.Neurons))
-		accumulatedDeltas[i] = make([][]float64, len(l.Neurons))
-		for j, n := range l.Neurons {
-			oldDeltas[i][j] = make([]float64, len(n.In))
-			accumulatedDeltas[i][j] = make([]float64, len(n.In))
-		}
-	}
-	return &training{
-		deltas:            deltas,
-		oldDeltas:         oldDeltas,
-		accumulatedDeltas: accumulatedDeltas,
 	}
 }
 

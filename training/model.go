@@ -1,4 +1,4 @@
-package deep
+package training
 
 import "math/rand"
 

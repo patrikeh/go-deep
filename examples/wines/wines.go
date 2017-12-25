@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/patrikeh/go-deep"
+	"github.com/patrikeh/go-deep/training"
 )
 
 func main() {
@@ -37,11 +38,13 @@ func main() {
 		Weight:     deep.NewUniform(0.25, 0),
 		Error:      deep.MSE,
 		Bias:       1,
-		Verbosity:  50,
 	})
 
+	trainer := training.NewBatchTrainer(0.05, 0.0001, 0.1, 50, 45, 4)
+	//trainer := training.NewTrainer(0.01, 0.001, 0.5, 50)
+
 	train, heldout := data.Split(0.65)
-	neural.TrainM(train, heldout, 20000, 100, 4, 0.05, 0.001, 0.5)
+	trainer.Train(neural, train, heldout, 10000)
 
 	correct := 0
 	for _, d := range heldout {
@@ -53,7 +56,7 @@ func main() {
 	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(heldout)))
 }
 
-func load(path string) (deep.Examples, error) {
+func load(path string) (training.Examples, error) {
 	f, err := os.Open(path)
 	defer f.Close()
 	if err != nil {
@@ -61,7 +64,7 @@ func load(path string) (deep.Examples, error) {
 	}
 	r := csv.NewReader(bufio.NewReader(f))
 
-	var examples deep.Examples
+	var examples training.Examples
 	for {
 		record, err := r.Read()
 		if err == io.EOF {
@@ -73,7 +76,7 @@ func load(path string) (deep.Examples, error) {
 	return examples, nil
 }
 
-func toExample(in []string) deep.Example {
+func toExample(in []string) training.Example {
 	res, err := strconv.ParseFloat(in[0], 64)
 	if err != nil {
 		panic(err)
@@ -88,7 +91,7 @@ func toExample(in []string) deep.Example {
 		features = append(features, res)
 	}
 
-	return deep.Example{
+	return training.Example{
 		Response: resEncoded,
 		Input:    features,
 	}
