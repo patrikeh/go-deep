@@ -18,8 +18,7 @@ func (n *Neural) TrainM(examples, validation Examples, iterations, batchSize, wo
 	for i := 0; i < workers; i++ {
 		nets[i] = NewNeural(n.Config)
 		go func(id int, workCh <-chan Examples) {
-			for {
-				batch := <-workCh
+			for batch := range workCh {
 				nets[id].ApplyWeights(n.Weights())
 				for _, e := range batch {
 					nets[id].Forward(e.Input)
