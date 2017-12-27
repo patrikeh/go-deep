@@ -24,6 +24,12 @@ func NewTrainer(lr, lambda, momentum float64, verbosity int) *Trainer {
 	}
 }
 
+type training struct {
+	deltas            [][]float64
+	accumulatedDeltas [][][]float64
+	oldDeltas         [][][]float64
+}
+
 func newTraining(layers []*deep.Layer) *training {
 	deltas := make([][]float64, len(layers))
 	oldDeltas := make([][][]float64, len(layers))
@@ -43,12 +49,6 @@ func newTraining(layers []*deep.Layer) *training {
 		oldDeltas:         oldDeltas,
 		accumulatedDeltas: accumulatedDeltas,
 	}
-}
-
-type training struct {
-	deltas            [][]float64
-	accumulatedDeltas [][][]float64
-	oldDeltas         [][][]float64
 }
 
 func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iterations int) {

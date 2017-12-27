@@ -40,8 +40,8 @@ func main() {
 		Bias:       1,
 	})
 
-	trainer := training.NewBatchTrainer(0.05, 0.0001, 0.1, 50, 45, 4)
-	//trainer := training.NewTrainer(0.01, 0.001, 0.5, 50)
+	//trainer := training.NewBatchTrainer(0.05, 0.0001, 0.1, 50, 45, 4)
+	trainer := training.NewTrainer(0.01, 0.001, 0.5, 50)
 
 	train, heldout := data.Split(0.65)
 	trainer.Train(neural, train, heldout, 10000)
