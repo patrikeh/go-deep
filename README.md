@@ -69,8 +69,8 @@ Epochs        Elapsed       Error
 ```
 Finally, make some predictions:
 ```go
-n.Predict(data[i].Input[0]) => [0.0058055785217672636]
-n.Predict(data[i].Input[5]) => [0.9936341906634203]
+n.Predict(data[0].Input) => [0.0058055785217672636]
+n.Predict(data[5].Input) => [0.9936341906634203]
 ```
 
 ## Examples
