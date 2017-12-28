@@ -18,7 +18,7 @@ func (n *Neuron) Fire() {
 	for _, s := range n.In {
 		sum += s.Out
 	}
-	n.Value = Act(n.A).f(sum)
+	n.Value = Act(n.A).F(sum)
 
 	for _, s := range n.Out {
 		s.Fire(n.Value)

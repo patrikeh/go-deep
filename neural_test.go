@@ -21,7 +21,7 @@ func Test_Init(t *testing.T) {
 	}
 }
 
-func Test_Sanity(t *testing.T) {
+func Test_Forward(t *testing.T) {
 	n := NewNeural(&Config{
 		Inputs:     3,
 		Layout:     []int{3, 3, 3},
@@ -62,7 +62,7 @@ func Test_Sanity(t *testing.T) {
 		}
 	}
 
-	n.Predict([]float64{0.1, 0.2, 0.7})
+	n.Forward([]float64{0.1, 0.2, 0.7})
 
 	expected := [][]float64{
 		[]float64{1.3, 1.66, 1.72},

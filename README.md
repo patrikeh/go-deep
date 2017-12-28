@@ -49,15 +49,13 @@ n := deep.NewNeural(&deep.Config{
 	Error: deep.MSE,
 	/* Bias node constant - 0 disables */
 	Bias: 1,
-	/* Print info at every n:th iteration */
-	Verbosity: 5,
 })
 ```
-Train!
+Train:
 ```go
-
+trainer := training.NewTrainer(0.5, 0, 0.1, 0) // learning rate, weight decay, momentum, verbosity (print info at every n:th iteration)
 training, heldout := data.Split(0.5)
-n.Train(data, heldout, 1000, 0.5, 0, 0.1) // data, iterations, learning rate, regularization, momentum
+trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ```
 resulting in:
 ```
@@ -71,8 +69,8 @@ Epochs        Elapsed       Error
 ```
 Finally, make some predictions:
 ```go
-n.Predict(data[i].Input[0]) => [0.0058055785217672636]
-n.Predict(data[i].Input[5]) => [0.9936341906634203]
+n.Predict(data[0].Input) => [0.0058055785217672636]
+n.Predict(data[5].Input) => [0.9936341906634203]
 ```
 
 ## Examples
@@ -82,5 +80,5 @@ See ```examples/``` for realistic examples:
 
 | Dataset | Topology | Epochs | Accuracy |
 | --- | --- | --- | --- |
-| wines | [5 5] | 10000 | ~96% |
-| mnist | [100] | 100 | ~95% |
+| wines | [5 5] | 10000 | ~98% |
+| mnist | [50] | 25 | ~96% |

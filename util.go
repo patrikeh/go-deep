@@ -110,3 +110,7 @@ func Softmax(xx []float64) []float64 {
 	}
 	return out
 }
+
+func Round(x float64) float64 {
+	return math.Floor(x + .5)
+}

@@ -1,4 +1,4 @@
-package deep
+package training
 
 import "math/rand"
 
@@ -27,10 +27,18 @@ func (e Examples) Split(p float64) (first, second Examples) {
 	return
 }
 
-func (e Examples) SplitN(size int) []Examples {
+func (e Examples) SplitSize(size int) []Examples {
 	res := make([]Examples, 0)
 	for i := 0; i < len(e); i += size {
 		res = append(res, e[i:min(i+size, len(e))])
+	}
+	return res
+}
+
+func (e Examples) SplitN(n int) []Examples {
+	res := make([]Examples, n)
+	for i, el := range e {
+		res[i%n] = append(res[i%n], el)
 	}
 	return res
 }

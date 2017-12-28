@@ -48,28 +48,28 @@ const (
 )
 
 type Activation interface {
-	f(float64) float64
-	df(float64) float64
+	F(float64) float64
+	Df(float64) float64
 }
 
 type Sigmoid struct{}
 
-func (a Sigmoid) f(x float64) float64  { return Logistic(x, 1.0) }
-func (a Sigmoid) df(y float64) float64 { return y * (1.0 - y) }
+func (a Sigmoid) F(x float64) float64  { return Logistic(x, 1) }
+func (a Sigmoid) Df(y float64) float64 { return y * (1 - y) }
 
 func Logistic(x, a float64) float64 {
-	return 1.0 / (1.0 + math.Exp(-a*x))
+	return 1 / (1 + math.Exp(-a*x))
 }
 
 type Tanh struct{}
 
-func (a Tanh) f(x float64) float64  { return (1 - math.Exp(-2*x)) / (1 + math.Exp(-2*x)) }
-func (a Tanh) df(y float64) float64 { return 1 - math.Pow(y, 2) }
+func (a Tanh) F(x float64) float64  { return (1 - math.Exp(-2*x)) / (1 + math.Exp(-2*x)) }
+func (a Tanh) Df(y float64) float64 { return 1 - math.Pow(y, 2) }
 
 type ReLU struct{}
 
-func (a ReLU) f(x float64) float64 { return math.Max(x, 0) }
-func (a ReLU) df(y float64) float64 {
+func (a ReLU) F(x float64) float64 { return math.Max(x, 0) }
+func (a ReLU) Df(y float64) float64 {
 	if y > 0 {
 		return 1
 	}
@@ -78,5 +78,5 @@ func (a ReLU) df(y float64) float64 {
 
 type Linear struct{}
 
-func (a Linear) f(x float64) float64  { return x }
-func (a Linear) df(x float64) float64 { return 1 }
+func (a Linear) F(x float64) float64  { return x }
+func (a Linear) Df(x float64) float64 { return 1 }

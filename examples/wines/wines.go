@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/patrikeh/go-deep"
+	"github.com/patrikeh/go-deep/training"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 	}
 
 	for i := range data {
-		deep.Normalize(data[i].Input)
+		deep.Standardize(data[i].Input)
 	}
 	data.Shuffle()
 
@@ -31,29 +32,32 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(data[0].Input),
-		Layout:     []int{5, 5, 3},
-		Activation: deep.ActivationReLU,
+		Layout:     []int{8, 3},
+		Activation: deep.ActivationTanh,
 		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(.25, 0.2),
+		Weight:     deep.NewUniform(0.5, 0),
 		Error:      deep.MSE,
 		Bias:       1,
-		Verbosity:  50,
 	})
 
-	neural.Train(data, data, 10000, 0.01, 0.00001, 0.5)
+	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.5, 50, 30, 2)
+	trainer := training.NewTrainer(0.01, 0.0001, 0.1, 50)
+
+	//train, heldout := data.Split(0.65)
+	heldout := data
+	trainer.Train(neural, data, data, 10000)
 
 	correct := 0
-	for _, d := range data {
+	for _, d := range heldout {
 		est := neural.Predict(d.Input)
 		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
 			correct++
 		}
-		fmt.Printf("want: %d guess: %d\n", deep.ArgMax(d.Response), deep.ArgMax(est))
 	}
-	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(data)))
+	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(heldout)))
 }
 
-func load(path string) (deep.Examples, error) {
+func load(path string) (training.Examples, error) {
 	f, err := os.Open(path)
 	defer f.Close()
 	if err != nil {
@@ -61,7 +65,7 @@ func load(path string) (deep.Examples, error) {
 	}
 	r := csv.NewReader(bufio.NewReader(f))
 
-	var examples deep.Examples
+	var examples training.Examples
 	for {
 		record, err := r.Read()
 		if err == io.EOF {
@@ -73,7 +77,7 @@ func load(path string) (deep.Examples, error) {
 	return examples, nil
 }
 
-func toExample(in []string) deep.Example {
+func toExample(in []string) training.Example {
 	res, err := strconv.ParseFloat(in[0], 64)
 	if err != nil {
 		panic(err)
@@ -88,7 +92,7 @@ func toExample(in []string) deep.Example {
 		features = append(features, res)
 	}
 
-	return deep.Example{
+	return training.Example{
 		Response: resEncoded,
 		Input:    features,
 	}
