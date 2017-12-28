@@ -34,6 +34,9 @@ func NewNeural(c *Config) *Neural {
 	if c.Activation == ActivationNone {
 		c.Activation = ActivationSigmoid
 	}
+	if c.Error == nil {
+		c.Error = MSE
+	}
 
 	layers := make([]*Layer, len(c.Layout))
 	for i := range layers {

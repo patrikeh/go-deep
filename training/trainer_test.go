@@ -53,7 +53,7 @@ func Test_RegressionLinearOuts(t *testing.T) {
 	trainer := NewTrainer(0.001, 0.0, 1, 0)
 	trainer.Train(n, squares, nil, 20000)
 
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 100; i++ {
 		x := float64(rand.Intn(99) + 1)
 		assert.InEpsilon(t, math.Sqrt(x)+1, n.Predict([]float64{x})[0]+1, 0.1)
 	}
@@ -177,6 +177,32 @@ func Test_MultiClass(t *testing.T) {
 		assert.InEpsilon(t, 1, trainer.CrossValidate(n, data)+1, 0.01)
 	}
 
+}
+
+func Test_or(t *testing.T) {
+	rand.Seed(0)
+	n := deep.NewNeural(&deep.Config{
+		Inputs:     2,
+		Layout:     []int{1, 1},
+		Activation: deep.ActivationTanh,
+		Weight:     deep.NewUniform(0.5, 0),
+		Bias:       1,
+	})
+	permutations := Examples{
+		{[]float64{0, 0}, []float64{0}},
+		{[]float64{1, 0}, []float64{1}},
+		{[]float64{0, 1}, []float64{1}},
+		{[]float64{1, 1}, []float64{1}},
+	}
+
+	//trainer := NewTrainer(0.5, 0, 0, 10)
+	trainer := NewBatchTrainer(0.5, 0, 0, 0, 4, 2)
+
+	trainer.Train(n, permutations, permutations, 25)
+
+	for _, perm := range permutations {
+		assert.Equal(t, deep.Round(n.Predict(perm.Input)[0]), perm.Response[0])
+	}
 }
 
 func Test_xor(t *testing.T) {

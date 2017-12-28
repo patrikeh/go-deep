@@ -92,12 +92,12 @@ func (t *Trainer) CrossValidate(n *deep.Neural, validation Examples) float64 {
 func (t *Trainer) learn(n *deep.Neural, e Example, lr, lambda, momentum float64) {
 	n.Forward(e.Input)
 	t.calculateDeltas(n, e.Response)
-	t.update(n, lr, lambda/float64(len(e.Input)), momentum)
+	t.update(n, lr, lambda, momentum)
 }
 
 func (t *Trainer) calculateDeltas(n *deep.Neural, ideal []float64) {
 	for i, neuron := range n.Layers[len(n.Layers)-1].Neurons {
-		t.deltas[len(n.Layers)-1][i] = deep.Act(neuron.A).Df(neuron.Value) * (ideal[i] - neuron.Value)
+		t.deltas[len(n.Layers)-1][i] = deep.Act(neuron.A).Df(neuron.Value) * (neuron.Value - ideal[i])
 	}
 
 	for i := len(n.Layers) - 2; i >= 0; i-- {
@@ -115,8 +115,8 @@ func (t *Trainer) update(n *deep.Neural, lr, lambda, momentum float64) {
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
-				delta := lr*t.deltas[i][j]*l.Neurons[j].In[k].In - l.Neurons[j].In[k].Weight*lr*lambda
-				l.Neurons[j].In[k].Weight += delta + momentum*t.oldDeltas[i][j][k]
+				delta := lr * t.deltas[i][j] * l.Neurons[j].In[k].In
+				l.Neurons[j].In[k].Weight -= delta + momentum*t.oldDeltas[i][j][k] - l.Neurons[j].In[k].Weight*lr*lambda
 				t.oldDeltas[i][j][k] = delta
 			}
 		}
