@@ -74,7 +74,7 @@ n.Predict(data[5].Input) => [0.9936341906634203]
 ```
 
 ## Examples
-See ```train_test.go``` for a variety of toy examples of regression, multi-class classification, binary classification, etc.
+See ```training/trainer_test.go``` for a variety of toy examples of regression, multi-class classification, binary classification, etc.
 
 See ```examples/``` for realistic examples:
 
