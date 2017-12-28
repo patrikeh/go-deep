@@ -49,15 +49,13 @@ n := deep.NewNeural(&deep.Config{
 	Error: deep.MSE,
 	/* Bias node constant - 0 disables */
 	Bias: 1,
-	/* Print info at every n:th iteration */
-	Verbosity: 5,
 })
 ```
-Train!
+Train:
 ```go
-
+trainer := training.NewTrainer(0.5, 0, 0.1, 0) // learning rate, weight decay, momentum, verbosity (print info at every n:th iteration)
 training, heldout := data.Split(0.5)
-n.Train(data, heldout, 1000, 0.5, 0, 0.1) // data, iterations, learning rate, regularization, momentum
+trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ```
 resulting in:
 ```
