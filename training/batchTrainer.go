@@ -172,7 +172,7 @@ func (t *BatchTrainer) update(n *deep.Neural, lr, lambda, momentum float64) {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
 				delta := lr * t.accumulatedDeltas[i][j][k]
-				l.Neurons[j].In[k].Weight -= delta + momentum*t.oldDeltas[i][j][k] - t.lr*l.Neurons[j].In[k].Weight*lambda
+				l.Neurons[j].In[k].Weight -= delta + momentum*t.oldDeltas[i][j][k] + t.lr*l.Neurons[j].In[k].Weight*lambda
 				t.oldDeltas[i][j][k] = delta
 				t.accumulatedDeltas[i][j][k] = 0
 			}

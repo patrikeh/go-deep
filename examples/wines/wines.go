@@ -35,7 +35,7 @@ func main() {
 		Layout:     []int{8, 3},
 		Activation: deep.ActivationTanh,
 		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(0.5, 0),
+		Weight:     deep.NewUniform(1.0, 0),
 		Error:      deep.MSE,
 		Bias:       1,
 	})

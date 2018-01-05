@@ -1,6 +1,7 @@
 package training
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"testing"
@@ -195,8 +196,7 @@ func Test_or(t *testing.T) {
 		{[]float64{1, 1}, []float64{1}},
 	}
 
-	//trainer := NewTrainer(0.5, 0, 0, 10)
-	trainer := NewBatchTrainer(0.5, 0, 0, 0, 4, 2)
+	trainer := NewTrainer(0.5, 0, 0, 10)
 
 	trainer.Train(n, permutations, permutations, 25)
 
@@ -209,7 +209,7 @@ func Test_xor(t *testing.T) {
 	rand.Seed(0)
 	n := deep.NewNeural(&deep.Config{
 		Inputs:     2,
-		Layout:     []int{2, 1}, // Should be sufficient for modeling (AND+OR)
+		Layout:     []int{3, 1}, // Sufficient for modeling (AND+OR) - with 5-6 neuron always converges
 		Activation: deep.ActivationSigmoid,
 		Weight:     deep.NewUniform(.25, 0),
 		Bias:       1,
@@ -221,10 +221,14 @@ func Test_xor(t *testing.T) {
 		{[]float64{1, 1}, []float64{0}},
 	}
 
-	trainer := NewTrainer(0.9, 0.0001, 0.1, 0)
-	trainer.Train(n, permutations, nil, 1000)
+	trainer := NewTrainer(1.0, 0, 0, 0)
+	trainer.Train(n, permutations, nil, 10000)
 
 	for _, perm := range permutations {
 		assert.InEpsilon(t, n.Predict(perm.Input)[0]+1, perm.Response[0]+1, 0.2)
 	}
+}
+
+func printResult(ideal, actual []float64) {
+	fmt.Printf("want: %+v have: %+v\n", ideal, actual)
 }
