@@ -171,11 +171,23 @@ func (t *BatchTrainer) update(n *deep.Neural, lr, lambda, momentum float64) {
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
-				delta := lr * t.accumulatedDeltas[i][j][k]
-				l.Neurons[j].In[k].Weight -= delta + momentum*t.oldDeltas[i][j][k] + t.lr*l.Neurons[j].In[k].Weight*lambda
+				delta := lr*t.accumulatedDeltas[i][j][k] + momentum*t.oldDeltas[i][j][k]
+				var reg float64
+				if !l.Neurons[j].In[k].IsBias {
+					reg = l.Neurons[j].In[k].Weight * lr * lambda
+				}
+				l.Neurons[j].In[k].Weight -= delta + reg
 				t.oldDeltas[i][j][k] = delta
 				t.accumulatedDeltas[i][j][k] = 0
 			}
 		}
 	}
 }
+
+/*
+delta := lr*t.deltas[i][j]*l.Neurons[j].In[k].In + momentum*t.oldDeltas[i][j][k]
+
+l.Neurons[j].In[k].Weight -= delta + reg
+t.oldDeltas[i][j][k] = delta
+
+*/

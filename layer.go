@@ -53,6 +53,7 @@ func (l *Layer) ApplyBias(weight WeightInitializer) []*Synapse {
 	biases := make([]*Synapse, len(l.Neurons))
 	for i := range l.Neurons {
 		biases[i] = NewSynapse(weight())
+		biases[i].IsBias = true
 		l.Neurons[i].In = append(l.Neurons[i].In, biases[i])
 	}
 	return biases

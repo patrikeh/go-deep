@@ -23,10 +23,10 @@ func Test_BoundedRegression(t *testing.T) {
 		Activation: deep.ActivationSigmoid,
 		Weight:     deep.NewUniform(0.5, 0),
 		Error:      deep.MSE,
-		Bias:       0,
+		Bias:       false,
 	})
 
-	trainer := NewTrainer(0.1, 0, 0.9, 0)
+	trainer := NewTrainer(0.1, 0, 0.5, 0)
 	trainer.Train(n, squares, nil, 1000)
 
 	tests := []float64{0.0, 0.1, 0.5, 0.75, 0.9}
@@ -48,10 +48,10 @@ func Test_RegressionLinearOuts(t *testing.T) {
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeRegression,
 		Weight:     deep.NewNormal(0.5, 0.5),
-		Bias:       1,
+		Bias:       true,
 	})
 
-	trainer := NewTrainer(0.001, 0.0, 1, 0)
+	trainer := NewTrainer(0.001, 0.0, 0.5, 0)
 	trainer.Train(n, squares, nil, 20000)
 
 	for i := 0; i < 100; i++ {
@@ -76,7 +76,7 @@ func Test_Training(t *testing.T) {
 		Layout:     []int{5, 1},
 		Activation: deep.ActivationSigmoid,
 		Weight:     deep.NewUniform(0.5, 0),
-		Bias:       1,
+		Bias:       true,
 	})
 
 	trainer := NewTrainer(0.5, 0, 0.1, 0)
@@ -109,7 +109,7 @@ func Test_Prediction(t *testing.T) {
 		Layout:     []int{2, 2, 1},
 		Activation: deep.ActivationSigmoid,
 		Weight:     deep.NewUniform(0.5, 0),
-		Bias:       1,
+		Bias:       true,
 	})
 
 	trainer := NewTrainer(0.5, 0, 0.1, 0)
@@ -128,7 +128,7 @@ func Test_CrossVal(t *testing.T) {
 		Activation: deep.ActivationTanh,
 		Weight:     deep.NewUniform(0.5, 0),
 		Error:      deep.MSE,
-		Bias:       1,
+		Bias:       true,
 	})
 
 	trainer := NewTrainer(0.5, 0.0001, 0.1, 0)
@@ -161,7 +161,7 @@ func Test_MultiClass(t *testing.T) {
 		Mode:       deep.ModeMulti,
 		Weight:     deep.NewUniform(0.1, 0),
 		Error:      deep.MSE,
-		Bias:       1,
+		Bias:       true,
 	})
 
 	trainer := NewTrainer(0.01, 0.0001, 0.1, 0)
@@ -187,7 +187,7 @@ func Test_or(t *testing.T) {
 		Layout:     []int{1, 1},
 		Activation: deep.ActivationTanh,
 		Weight:     deep.NewUniform(0.5, 0),
-		Bias:       1,
+		Bias:       true,
 	})
 	permutations := Examples{
 		{[]float64{0, 0}, []float64{0}},
@@ -212,7 +212,7 @@ func Test_xor(t *testing.T) {
 		Layout:     []int{3, 1}, // Sufficient for modeling (AND+OR) - with 5-6 neuron always converges
 		Activation: deep.ActivationSigmoid,
 		Weight:     deep.NewUniform(.25, 0),
-		Bias:       1,
+		Bias:       true,
 	})
 	permutations := Examples{
 		{[]float64{0, 0}, []float64{0}},
@@ -221,8 +221,8 @@ func Test_xor(t *testing.T) {
 		{[]float64{1, 1}, []float64{0}},
 	}
 
-	trainer := NewTrainer(1.0, 0, 0, 0)
-	trainer.Train(n, permutations, nil, 10000)
+	trainer := NewTrainer(1.0, 0.00001, 0, 0)
+	trainer.Train(n, permutations, permutations, 5000)
 
 	for _, perm := range permutations {
 		assert.InEpsilon(t, n.Predict(perm.Input)[0]+1, perm.Response[0]+1, 0.2)

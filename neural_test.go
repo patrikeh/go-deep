@@ -12,7 +12,7 @@ func Test_Init(t *testing.T) {
 		Layout:     []int{4, 4, 2},
 		Activation: ActivationTanh,
 		Weight:     NewUniform(0.5, 0),
-		Bias:       1,
+		Bias:       true,
 	})
 
 	assert.Len(t, n.Layers, len(n.Config.Layout))
@@ -27,7 +27,7 @@ func Test_Forward(t *testing.T) {
 		Layout:     []int{3, 3, 3},
 		Activation: ActivationReLU,
 		Mode:       ModeMulti,
-		Bias:       1,
+		Bias:       true,
 	})
 	weights := [][][]float64{
 		[][]float64{

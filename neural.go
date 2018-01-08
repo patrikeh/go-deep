@@ -19,7 +19,7 @@ type Config struct {
 	Mode       Mode
 	Weight     WeightInitializer `json:"-"`
 	Error      ErrorMeasure      `json:"-"`
-	Bias       float64
+	Bias       bool
 }
 
 func NewNeural(c *Config) *Neural {
@@ -59,7 +59,7 @@ func NewNeural(c *Config) *Neural {
 	}
 
 	var biases [][]*Synapse
-	if c.Bias > 0 {
+	if c.Bias {
 		biases = make([][]*Synapse, len(layers))
 		for i := 0; i < len(layers); i++ {
 			if c.Mode == ModeRegression && i == len(layers)-1 {
@@ -79,7 +79,7 @@ func NewNeural(c *Config) *Neural {
 func (n *Neural) Fire() {
 	for i := range n.Biases {
 		for j := range n.Biases[i] {
-			n.Biases[i][j].Fire(n.Config.Bias)
+			n.Biases[i][j].Fire(1)
 		}
 	}
 	for _, l := range n.Layers {

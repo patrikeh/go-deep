@@ -54,11 +54,11 @@ func main() {
 		Mode:       deep.ModeMulti,
 		Weight:     deep.NewNormal(0.6, 0.1), // slight positive bias helps ReLU
 		Error:      deep.MSE,
-		Bias:       1,
+		Bias:       true,
 	})
 
-	trainer := training.NewTrainer(0.01, 0.0001, 0.1, 1)
-	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.1, 1, 500, 4)
+	trainer := training.NewTrainer(0.01, 0.0001, 0.05, 1)
+	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.05, 1, 500, 4)
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
 	p := profile.Start()
 	trainer.Train(neural, train, test, 25)

@@ -37,15 +37,15 @@ func main() {
 		Mode:       deep.ModeMulti,
 		Weight:     deep.NewUniform(1.0, 0),
 		Error:      deep.MSE,
-		Bias:       1,
+		Bias:       true,
 	})
 
-	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.5, 50, 30, 2)
-	trainer := training.NewTrainer(0.01, 0.0001, 0.1, 50)
+	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.5, 50, 4, 2)
+	trainer := training.NewTrainer(0.005, 0.00001, 0.9, 50)
 
 	//train, heldout := data.Split(0.65)
 	heldout := data
-	trainer.Train(neural, data, data, 10000)
+	trainer.Train(neural, data, data, 5000)
 
 	correct := 0
 	for _, d := range heldout {

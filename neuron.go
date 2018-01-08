@@ -28,6 +28,7 @@ func (n *Neuron) Fire() {
 type Synapse struct {
 	Weight  float64
 	In, Out float64 `json:"-"`
+	IsBias  bool
 }
 
 func NewSynapse(weight float64) *Synapse {

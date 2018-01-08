@@ -15,7 +15,7 @@ func Test_RestoreFromDump(t *testing.T) {
 		Layout:     []int{5, 3, 1},
 		Activation: ActivationSigmoid,
 		Weight:     NewUniform(0.5, 0),
-		Bias:       1,
+		Bias:       true,
 	})
 
 	dump := n.Dump()
@@ -38,7 +38,7 @@ func Test_Marshal(t *testing.T) {
 		Layout:     []int{3, 3, 1},
 		Activation: ActivationSigmoid,
 		Weight:     NewUniform(0.5, 0),
-		Bias:       1,
+		Bias:       true,
 	})
 
 	dump, err := n.Marshal()
