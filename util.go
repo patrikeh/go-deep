@@ -114,3 +114,11 @@ func Softmax(xx []float64) []float64 {
 func Round(x float64) float64 {
 	return math.Floor(x + .5)
 }
+
+func Dot(xx, yy []float64) float64 {
+	var p float64
+	for i := range xx {
+		p += xx[i] * yy[i]
+	}
+	return p
+}

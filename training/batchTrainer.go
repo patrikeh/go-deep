@@ -127,25 +127,19 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 		}
 
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
-			rms := t.CrossValidate(n, validation)
-			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+t.verbosity, time.Since(ts).String(), rms)
+			loss := CrossValidate(n, validation)
+			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+t.verbosity, time.Since(ts).String(), loss)
 			w.Flush()
 		}
 	}
 }
 
-func (t *BatchTrainer) CrossValidate(n *deep.Neural, validation Examples) float64 {
-	predictions, responses := make([][]float64, len(validation)), make([][]float64, len(validation))
-	for i := 0; i < len(validation); i++ {
-		predictions[i] = n.Predict(validation[i].Input)
-		responses[i] = validation[i].Response
-	}
-	return n.Config.Error(responses, predictions)
-}
-
 func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int) {
 	for i, neuron := range n.Layers[len(n.Layers)-1].Neurons {
-		t.deltas[wid][len(n.Layers)-1][i] = deep.Act(neuron.A).Df(neuron.Value) * (neuron.Value - ideal[i])
+		t.deltas[wid][len(n.Layers)-1][i] = deep.GetLoss(n.Config.Loss).Df(
+			neuron.Value,
+			ideal[i],
+			deep.Act(neuron.A).Df(neuron.Value))
 	}
 
 	for i := len(n.Layers) - 2; i >= 0; i-- {

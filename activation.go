@@ -5,9 +5,10 @@ import "math"
 type Mode int
 
 const (
-	ModeDefault    Mode = 0 // Use default output layer activations (i.e. sigmoid, tanh, relu)
-	ModeMulti      Mode = 1 // Softmax output layer
+	ModeDefault    Mode = 0 // Use default output layer activations
+	ModeMulti      Mode = 1 // Softmax output layer for multiclass classification
 	ModeRegression Mode = 2 // Linear output layer
+	ModeBinary     Mode = 3 // Sigmoid output layer for binary classification
 )
 
 func OutputActivation(c Mode) ActivationType {
@@ -16,6 +17,8 @@ func OutputActivation(c Mode) ActivationType {
 		return ActivationSoftmax
 	case ModeRegression:
 		return ActivationLinear
+	case ModeBinary:
+		return ActivationSigmoid
 	}
 	return ActivationNone
 }

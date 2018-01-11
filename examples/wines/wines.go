@@ -35,8 +35,7 @@ func main() {
 		Layout:     []int{8, 3},
 		Activation: deep.ActivationTanh,
 		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(1.0, 0),
-		Error:      deep.MSE,
+		Weight:     deep.NewNormal(1, 0),
 		Bias:       true,
 	})
 
@@ -45,7 +44,7 @@ func main() {
 
 	//train, heldout := data.Split(0.65)
 	heldout := data
-	trainer.Train(neural, data, data, 5000)
+	trainer.Train(neural, data, data, 10000)
 
 	correct := 0
 	for _, d := range heldout {
