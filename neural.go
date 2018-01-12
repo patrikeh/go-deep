@@ -35,7 +35,9 @@ func NewNeural(c *Config) *Neural {
 		c.Activation = ActivationSigmoid
 	}
 	if c.Loss == LossNone {
-		if c.Mode == ModeBinary || c.Mode == ModeMulti {
+		if c.Mode == ModeBinary {
+			c.Loss = LossBinaryCrossEntropy
+		} else if c.Mode == ModeMulti {
 			c.Loss = LossCrossEntropy
 		} else {
 			c.Loss = LossMeanSquared

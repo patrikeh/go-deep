@@ -10,6 +10,8 @@ func GetLoss(loss LossType) Loss {
 		return CrossEntropy{}
 	case LossMeanSquared:
 		return MeanSquared{}
+	case LossBinaryCrossEntropy:
+		return BinaryCrossEntropy{}
 	}
 	return CrossEntropy{}
 }
@@ -20,6 +22,8 @@ func (l LossType) String() string {
 	switch l {
 	case LossCrossEntropy:
 		return "Cross Entropy"
+	case LossBinaryCrossEntropy:
+		return "Binary Cross Entropy"
 	case LossMeanSquared:
 		return "Mean Squared Error"
 	}
@@ -27,9 +31,10 @@ func (l LossType) String() string {
 }
 
 const (
-	LossNone         LossType = 0
-	LossCrossEntropy LossType = 1
-	LossMeanSquared  LossType = 2
+	LossNone               LossType = 0
+	LossCrossEntropy       LossType = 1
+	LossBinaryCrossEntropy LossType = 2
+	LossMeanSquared        LossType = 3
 )
 
 type Loss interface {
@@ -58,6 +63,25 @@ func (l CrossEntropy) Df(estimate, ideal, activation float64) float64 {
 	return estimate - ideal
 }
 
+// Binary CE
+type BinaryCrossEntropy struct{}
+
+func (l BinaryCrossEntropy) F(estimate, ideal [][]float64) float64 {
+	var sum float64
+	for i := range estimate {
+		ce := 0.0
+		for j := range estimate[i] {
+			ce += ideal[i][j]*math.Log(estimate[i][0]) + (1-ideal[i][j])*math.Log(1-estimate[i][j])
+		}
+		sum -= ce
+	}
+	return sum / float64(len(estimate))
+}
+
+func (l BinaryCrossEntropy) Df(estimate, ideal, activation float64) float64 {
+	return estimate - ideal
+}
+
 type MeanSquared struct{}
 
 func (l MeanSquared) F(estimate, ideal [][]float64) float64 {
@@ -70,6 +94,6 @@ func (l MeanSquared) F(estimate, ideal [][]float64) float64 {
 	return sum / float64(len(estimate)*len(estimate[0]))
 }
 
-func (l MeanSquared) Df(estimate, ideal, activation float64) float64 {
-	return activation * (estimate - ideal)
+func (l MeanSquared) Df(estimate, ideal, activationGrad float64) float64 {
+	return activationGrad * (estimate - ideal)
 }
