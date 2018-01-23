@@ -55,8 +55,8 @@ func main() {
 		Bias:       true,
 	})
 
-	trainer := training.NewTrainer(0.01, 0.00001, 0.5, 1)
-	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.05, 1, 500, 4)
+	//trainer := training.NewTrainer(0.01, 0.00001, 0.5, 1)
+	trainer := training.NewBatchTrainer(0.01, 0.00001, 0.5, 1, 500, 4)
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
 	//p := profile.Start()
 	trainer.Train(neural, train, test, 25)

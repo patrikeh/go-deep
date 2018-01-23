@@ -94,7 +94,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 16, 0, 3, ' ', 0)
-	fmt.Fprint(w, "Epochs\tElapsed\tError\t\n---\t---\t---\t\n")
+	fmt.Fprintf(w, "Epochs\tElapsed\tLoss (%s)\t\n---\t---\t---\t\n", n.Config.Loss)
 	ts := time.Now()
 	for i := 0; i < iterations; i++ {
 		train.Shuffle()
@@ -123,7 +123,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 				}
 			}
 
-			t.update(n, t.lr, t.lambda, t.momentum)
+			t.update(n, t.lr/float64(len(batches[i])), t.lambda, t.momentum)
 		}
 
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
@@ -155,7 +155,7 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
-				t.partialDeltas[wid][i][j][k] = t.deltas[wid][i][j] * l.Neurons[j].In[k].In
+				t.partialDeltas[wid][i][j][k] += t.deltas[wid][i][j] * l.Neurons[j].In[k].In
 			}
 		}
 	}
@@ -177,11 +177,3 @@ func (t *BatchTrainer) update(n *deep.Neural, lr, lambda, momentum float64) {
 		}
 	}
 }
-
-/*
-delta := lr*t.deltas[i][j]*l.Neurons[j].In[k].In + momentum*t.oldDeltas[i][j][k]
-
-l.Neurons[j].In[k].Weight -= delta + reg
-t.oldDeltas[i][j][k] = delta
-
-*/

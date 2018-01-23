@@ -45,13 +45,12 @@ type Loss interface {
 type CrossEntropy struct{}
 
 func (l CrossEntropy) F(estimate, ideal [][]float64) float64 {
-	epsilon := 1e-18
 
 	var sum float64
 	for i := range estimate {
 		ce := 0.0
 		for j := range estimate[i] {
-			ce += ideal[i][j] * math.Log(estimate[i][j]+epsilon)
+			ce += ideal[i][j] * math.Log(estimate[i][j])
 		}
 
 		sum -= ce
