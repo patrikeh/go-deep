@@ -34,7 +34,7 @@ func main() {
 		Inputs:     len(data[0].Input),
 		Layout:     []int{8, 3},
 		Activation: deep.ActivationTanh,
-		Mode:       deep.ModeMulticlass,
+		Mode:       deep.ModeMultiClass,
 		Weight:     deep.NewNormal(1, 0),
 		Bias:       true,
 	})

@@ -167,7 +167,7 @@ func Test_MultiClass(t *testing.T) {
 		Inputs:     2,
 		Layout:     []int{2, 2},
 		Activation: deep.ActivationReLU,
-		Mode:       deep.ModeMulticlass,
+		Mode:       deep.ModeMultiClass,
 		Loss:       deep.LossMeanSquared,
 		Weight:     deep.NewUniform(0.1, 0),
 		Bias:       true,

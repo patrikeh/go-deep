@@ -50,7 +50,7 @@ func main() {
 		Inputs:     len(train[0].Input),
 		Layout:     []int{30, 10},
 		Activation: deep.ActivationReLU,
-		Mode:       deep.ModeMulticlass,
+		Mode:       deep.ModeMultiClass,
 		Weight:     deep.NewNormal(0.6, 0.1), // slight positive bias helps ReLU
 		Bias:       true,
 	})

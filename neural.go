@@ -36,7 +36,7 @@ func NewNeural(c *Config) *Neural {
 	}
 	if c.Loss == LossNone {
 		switch c.Mode {
-		case ModeMulticlass, ModeMultiLabel:
+		case ModeMultiClass, ModeMultiLabel:
 			c.Loss = LossCrossEntropy
 		case ModeBinary:
 			c.Loss = LossBinaryCrossEntropy

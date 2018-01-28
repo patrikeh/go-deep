@@ -26,7 +26,7 @@ func Test_Forward(t *testing.T) {
 		Inputs:     3,
 		Layout:     []int{3, 3, 3},
 		Activation: ActivationReLU,
-		Mode:       ModeMulticlass,
+		Mode:       ModeMultiClass,
 		Bias:       true,
 	})
 	weights := [][][]float64{
