@@ -34,12 +34,12 @@ func main() {
 		Inputs:     len(data[0].Input),
 		Layout:     []int{8, 3},
 		Activation: deep.ActivationTanh,
-		Mode:       deep.ModeMulti,
+		Mode:       deep.ModeMulticlass,
 		Weight:     deep.NewNormal(1, 0),
 		Bias:       true,
 	})
 
-	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.5, 50, 4, 2)
+	//trainer := training.NewBatchTrainer(0.1, 0.0001, 0.5, 50, 50, 4)
 	trainer := training.NewTrainer(0.005, 0.00001, 0.9, 50)
 
 	//train, heldout := data.Split(0.65)
