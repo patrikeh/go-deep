@@ -5,22 +5,26 @@ import "math"
 type Mode int
 
 const (
-	ModeDefault    Mode = 0 // Use default output layer activations (i.e. sigmoid, tanh, relu)
-	ModeMulti      Mode = 1 // Softmax output layer
+	ModeDefault    Mode = 0 // Use default output layer activations
+	ModeMultiClass Mode = 1 // Softmax output layer for multiclass classification
 	ModeRegression Mode = 2 // Linear output layer
+	ModeBinary     Mode = 3 // Sigmoid output layer for binary classification
+	ModeMultiLabel Mode = 4 // Sigmoid output layer with multiclass CE (no softmax)
 )
 
 func OutputActivation(c Mode) ActivationType {
 	switch c {
-	case ModeMulti:
+	case ModeMultiClass:
 		return ActivationSoftmax
 	case ModeRegression:
 		return ActivationLinear
+	case ModeBinary, ModeMultiLabel:
+		return ActivationSigmoid
 	}
 	return ActivationNone
 }
 
-func Act(act ActivationType) Activation {
+func GetActivation(act ActivationType) Differentiable {
 	switch act {
 	case ActivationSigmoid:
 		return Sigmoid{}
@@ -47,7 +51,7 @@ const (
 	ActivationSoftmax ActivationType = 5
 )
 
-type Activation interface {
+type Differentiable interface {
 	F(float64) float64
 	Df(float64) float64
 }

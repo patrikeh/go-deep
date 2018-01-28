@@ -13,25 +13,34 @@ import (
 func Test_BoundedRegression(t *testing.T) {
 	rand.Seed(0)
 
-	squares := Examples{}
-	for i := 0.0; i < 1; i += 0.01 {
-		squares = append(squares, Example{Input: []float64{i}, Response: []float64{math.Pow(i, 2)}})
+	funcs := []func(float64) float64{
+		math.Sin,
+		func(x float64) float64 { return math.Pow(x, 2) },
+		math.Sqrt,
 	}
-	n := deep.NewNeural(&deep.Config{
-		Inputs:     1,
-		Layout:     []int{4, 4, 1},
-		Activation: deep.ActivationSigmoid,
-		Weight:     deep.NewUniform(0.5, 0),
-		Error:      deep.MSE,
-		Bias:       false,
-	})
 
-	trainer := NewTrainer(0.1, 0, 0.5, 0)
-	trainer.Train(n, squares, nil, 1000)
+	for _, f := range funcs {
 
-	tests := []float64{0.0, 0.1, 0.5, 0.75, 0.9}
-	for _, x := range tests {
-		assert.InEpsilon(t, math.Pow(x, 2)+1, n.Predict([]float64{x})[0]+1, 0.1)
+		data := Examples{}
+		for i := 0.0; i < 1; i += 0.01 {
+			data = append(data, Example{Input: []float64{i}, Response: []float64{f(i)}})
+		}
+		n := deep.NewNeural(&deep.Config{
+			Inputs:     1,
+			Layout:     []int{4, 4, 1},
+			Activation: deep.ActivationTanh,
+			Mode:       deep.ModeRegression,
+			Weight:     deep.NewUniform(0.5, 0),
+			Bias:       true,
+		})
+
+		trainer := NewTrainer(0.25, 0.0001, 0.5, 0)
+		trainer.Train(n, data, nil, 5000)
+
+		tests := []float64{0.0, 0.1, 0.25, 0.5, 0.75, 0.9}
+		for _, x := range tests {
+			assert.InEpsilon(t, f(x)+1, n.Predict([]float64{x})[0]+1, 0.1)
+		}
 	}
 }
 
@@ -126,8 +135,8 @@ func Test_CrossVal(t *testing.T) {
 		Inputs:     2,
 		Layout:     []int{1, 1},
 		Activation: deep.ActivationTanh,
+		Loss:       deep.LossMeanSquared,
 		Weight:     deep.NewUniform(0.5, 0),
-		Error:      deep.MSE,
 		Bias:       true,
 	})
 
@@ -136,7 +145,7 @@ func Test_CrossVal(t *testing.T) {
 
 	for _, d := range data {
 		assert.InEpsilon(t, n.Predict(d.Input)[0]+1, d.Response[0]+1, 0.1)
-		assert.InEpsilon(t, 1, trainer.CrossValidate(n, data)+1, 0.01)
+		assert.InEpsilon(t, 1, CrossValidate(n, data)+1, 0.01)
 	}
 }
 
@@ -158,9 +167,9 @@ func Test_MultiClass(t *testing.T) {
 		Inputs:     2,
 		Layout:     []int{2, 2},
 		Activation: deep.ActivationReLU,
-		Mode:       deep.ModeMulti,
+		Mode:       deep.ModeMultiClass,
+		Loss:       deep.LossMeanSquared,
 		Weight:     deep.NewUniform(0.1, 0),
-		Error:      deep.MSE,
 		Bias:       true,
 	})
 
@@ -175,7 +184,7 @@ func Test_MultiClass(t *testing.T) {
 		} else {
 			assert.InEpsilon(t, n.Predict(d.Input)[1]+1, d.Response[1]+1, 0.1)
 		}
-		assert.InEpsilon(t, 1, trainer.CrossValidate(n, data)+1, 0.01)
+		assert.InEpsilon(t, 1, CrossValidate(n, data)+1, 0.01)
 	}
 
 }
@@ -186,6 +195,7 @@ func Test_or(t *testing.T) {
 		Inputs:     2,
 		Layout:     []int{1, 1},
 		Activation: deep.ActivationTanh,
+		Mode:       deep.ModeBinary,
 		Weight:     deep.NewUniform(0.5, 0),
 		Bias:       true,
 	})
@@ -211,6 +221,7 @@ func Test_xor(t *testing.T) {
 		Inputs:     2,
 		Layout:     []int{3, 1}, // Sufficient for modeling (AND+OR) - with 5-6 neuron always converges
 		Activation: deep.ActivationSigmoid,
+		Mode:       deep.ModeBinary,
 		Weight:     deep.NewUniform(.25, 0),
 		Bias:       true,
 	})
@@ -222,7 +233,7 @@ func Test_xor(t *testing.T) {
 	}
 
 	trainer := NewTrainer(1.0, 0.00001, 0, 0)
-	trainer.Train(n, permutations, permutations, 5000)
+	trainer.Train(n, permutations, permutations, 1000)
 
 	for _, perm := range permutations {
 		assert.InEpsilon(t, n.Predict(perm.Input)[0]+1, perm.Response[0]+1, 0.2)

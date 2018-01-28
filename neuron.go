@@ -18,11 +18,19 @@ func (n *Neuron) Fire() {
 	for _, s := range n.In {
 		sum += s.Out
 	}
-	n.Value = Act(n.A).F(sum)
+	n.Value = n.Activate(sum)
 
 	for _, s := range n.Out {
 		s.Fire(n.Value)
 	}
+}
+
+func (n *Neuron) Activate(x float64) float64 {
+	return GetActivation(n.A).F(x)
+}
+
+func (n *Neuron) DActivate(x float64) float64 {
+	return GetActivation(n.A).Df(x)
 }
 
 type Synapse struct {

@@ -18,7 +18,7 @@ type Config struct {
 	Activation ActivationType
 	Mode       Mode
 	Weight     WeightInitializer `json:"-"`
-	Error      ErrorMeasure      `json:"-"`
+	Loss       LossType
 	Bias       bool
 }
 
@@ -34,8 +34,15 @@ func NewNeural(c *Config) *Neural {
 	if c.Activation == ActivationNone {
 		c.Activation = ActivationSigmoid
 	}
-	if c.Error == nil {
-		c.Error = MSE
+	if c.Loss == LossNone {
+		switch c.Mode {
+		case ModeMultiClass, ModeMultiLabel:
+			c.Loss = LossCrossEntropy
+		case ModeBinary:
+			c.Loss = LossBinaryCrossEntropy
+		default:
+			c.Loss = LossMeanSquared
+		}
 	}
 
 	layers := make([]*Layer, len(c.Layout))

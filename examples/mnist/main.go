@@ -13,7 +13,6 @@ import (
 	"github.com/patrikeh/go-deep/training"
 
 	deep "github.com/patrikeh/go-deep"
-	"github.com/pkg/profile"
 )
 
 /*
@@ -40,8 +39,8 @@ func main() {
 		}
 	}
 	for i := range test {
-		for j := range train[i].Input {
-			train[i].Input[j] = train[i].Input[j] / 255
+		for j := range test[i].Input {
+			test[i].Input[j] = test[i].Input[j] / 255
 		}
 	}
 	test.Shuffle()
@@ -49,20 +48,19 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(train[0].Input),
-		Layout:     []int{30, 30, 10},
+		Layout:     []int{30, 10},
 		Activation: deep.ActivationReLU,
-		Mode:       deep.ModeMulti,
+		Mode:       deep.ModeMultiClass,
 		Weight:     deep.NewNormal(0.6, 0.1), // slight positive bias helps ReLU
-		Error:      deep.MSE,
 		Bias:       true,
 	})
 
-	trainer := training.NewTrainer(0.01, 0.0001, 0.05, 1)
-	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.05, 1, 500, 4)
+	//trainer := training.NewTrainer(0.01, 0.00001, 0.5, 1)
+	trainer := training.NewBatchTrainer(0.01, 0.00001, 0.5, 1, 200, 4)
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
-	p := profile.Start()
-	trainer.Train(neural, train, test, 25)
-	p.Stop()
+	//p := profile.Start()
+	trainer.Train(neural, train, test, 50)
+	//p.Stop()
 
 	correct := 0
 	for _, d := range test {

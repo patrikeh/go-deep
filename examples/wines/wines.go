@@ -34,18 +34,17 @@ func main() {
 		Inputs:     len(data[0].Input),
 		Layout:     []int{8, 3},
 		Activation: deep.ActivationTanh,
-		Mode:       deep.ModeMulti,
-		Weight:     deep.NewUniform(1.0, 0),
-		Error:      deep.MSE,
+		Mode:       deep.ModeMultiClass,
+		Weight:     deep.NewNormal(1, 0),
 		Bias:       true,
 	})
 
-	//trainer := training.NewBatchTrainer(0.01, 0.0001, 0.5, 50, 4, 2)
+	//trainer := training.NewBatchTrainer(0.1, 0.0001, 0.5, 50, 50, 4)
 	trainer := training.NewTrainer(0.005, 0.00001, 0.9, 50)
 
 	//train, heldout := data.Split(0.65)
 	heldout := data
-	trainer.Train(neural, data, data, 5000)
+	trainer.Train(neural, data, data, 10000)
 
 	correct := 0
 	for _, d := range heldout {

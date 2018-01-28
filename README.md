@@ -1,18 +1,19 @@
 # go-deep
 Feed forward/backpropagation neural network implementation. Currently supports:
+
+- Modular activation functions (sigmoid, hyperbolic, ReLU)
+- Classification modes: regression, multi-class, multi-label, binary
+- Momentum
 - Bias nodes
 - L2 regularization
-- Modular activation functions (sigmoid, hyperbolic, ReLU)
-- Classification modes: Regression (linear output), Multiclass (softmax output)
-- Momentum
 - Cross-validated training
 
 Networks are modeled as a set of neurons connected through synapses. Consequently not the fastest implementation, but hopefully an intuitive one.
 
 Todo:
 - Dropout
-- Minibatches
-- Other learning techniques
+- Batch normalization
+- Optimizers other than SGD
 
 ## Usage
 Define some data...
@@ -38,22 +39,22 @@ n := deep.NewNeural(&deep.Config{
 	Layout: []int{2, 2, 1},
 	/* Activation functions, available options are {deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear} */
 	Activation: deep.Sigmoid,
-	/* Determines output layer activation: {ModeDefault, ModeRegression, ModeMulti}. 
+	/* Determines output layer activation: 
+	{ModeBinary, ModeRegression, ModeMultiClass, ModeMultiLabel}. 
 	In the case of ModeRegression, linear outputs are used. 
-	In the case of ModeMulti, a softmax output layer is applied.
+	In the case of ModeMulticlass, a softmax output layer is applied.
 	Default applies the activation defined above as per usual.*/
 	Mode: ModeDefault,
 	/* Weight initializers: {deep.NewNormal(stdDev, mean), deep.NewUniform(stdDev, mean)} */
 	Weight: deep.NewNormal(1.0, 0.0),
-	/* Error metric in cross validated training */
-	Error: deep.MSE,
-	/* Bias node constant - 0 disables */
-	Bias: 1,
+	/* Apply bias */
+	Bias: true,
 })
 ```
 Train:
 ```go
-trainer := training.NewTrainer(0.5, 0, 0.1, 0) // learning rate, weight decay, momentum, verbosity (print info at every n:th iteration)
+// learning rate, weight decay, momentum, verbosity (print info at every n:th iteration)
+trainer := training.NewTrainer(0.5, 0, 0.1, 0)
 training, heldout := data.Split(0.5)
 trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ```
@@ -73,6 +74,14 @@ n.Predict(data[0].Input) => [0.0058055785217672636]
 n.Predict(data[5].Input) => [0.9936341906634203]
 ```
 
+Alternatively, batch training can be performed in parallell:
+```go
+// learning rate, weight decay, momentum, verbosity (print info at every n:th iteration), batch-size, number of workers
+trainer := training.NewBatchTrainer(0.01, 0.0001, 0.5, 1, 200, 4)
+training, heldout := data.Split(0.75)
+trainer.Train(n, training, heldout, 1000) // training, validation, iterations
+```
+
 ## Examples
 See ```training/trainer_test.go``` for a variety of toy examples of regression, multi-class classification, binary classification, etc.
 
@@ -81,4 +90,4 @@ See ```examples/``` for realistic examples:
 | Dataset | Topology | Epochs | Accuracy |
 | --- | --- | --- | --- |
 | wines | [5 5] | 10000 | ~98% |
-| mnist | [50] | 25 | ~96% |
+| mnist | [50] | 25 | ~97% |
