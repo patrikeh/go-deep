@@ -21,22 +21,21 @@ func Test_BoundedRegression(t *testing.T) {
 
 	for _, f := range funcs {
 
-		squares := Examples{}
+		data := Examples{}
 		for i := 0.0; i < 1; i += 0.01 {
-			squares = append(squares, Example{Input: []float64{i}, Response: []float64{f(i)}})
+			data = append(data, Example{Input: []float64{i}, Response: []float64{f(i)}})
 		}
 		n := deep.NewNeural(&deep.Config{
 			Inputs:     1,
 			Layout:     []int{4, 4, 1},
 			Activation: deep.ActivationTanh,
-			Loss:       deep.LossMeanSquared,
 			Mode:       deep.ModeRegression,
 			Weight:     deep.NewUniform(0.5, 0),
 			Bias:       true,
 		})
 
 		trainer := NewTrainer(0.25, 0.0001, 0.5, 0)
-		trainer.Train(n, squares, nil, 5000)
+		trainer.Train(n, data, nil, 5000)
 
 		tests := []float64{0.0, 0.1, 0.25, 0.5, 0.75, 0.9}
 		for _, x := range tests {

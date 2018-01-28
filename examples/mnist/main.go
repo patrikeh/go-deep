@@ -48,18 +48,18 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(train[0].Input),
-		Layout:     []int{30, 10},
+		Layout:     []int{100, 10},
 		Activation: deep.ActivationReLU,
-		Mode:       deep.ModeMulti,
+		Mode:       deep.ModeMultiLabel,
 		Weight:     deep.NewNormal(0.6, 0.1), // slight positive bias helps ReLU
 		Bias:       true,
 	})
 
 	//trainer := training.NewTrainer(0.01, 0.00001, 0.5, 1)
-	trainer := training.NewBatchTrainer(0.01, 0.00001, 0.5, 1, 500, 4)
+	trainer := training.NewBatchTrainer(0.01, 0.00001, 0.5, 1, 200, 4)
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
 	//p := profile.Start()
-	trainer.Train(neural, train, test, 25)
+	trainer.Train(neural, train, test, 50)
 	//p.Stop()
 
 	correct := 0

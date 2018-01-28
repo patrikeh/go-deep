@@ -9,6 +9,7 @@ const (
 	ModeMulti      Mode = 1 // Softmax output layer for multiclass classification
 	ModeRegression Mode = 2 // Linear output layer
 	ModeBinary     Mode = 3 // Sigmoid output layer for binary classification
+	ModeMultiLabel Mode = 4 // Sigmoid output layer with multiclass CE (no softmax)
 )
 
 func OutputActivation(c Mode) ActivationType {
@@ -17,13 +18,13 @@ func OutputActivation(c Mode) ActivationType {
 		return ActivationSoftmax
 	case ModeRegression:
 		return ActivationLinear
-	case ModeBinary:
+	case ModeBinary, ModeMultiLabel:
 		return ActivationSigmoid
 	}
 	return ActivationNone
 }
 
-func Act(act ActivationType) Activation {
+func GetActivation(act ActivationType) Differentiable {
 	switch act {
 	case ActivationSigmoid:
 		return Sigmoid{}
@@ -50,7 +51,7 @@ const (
 	ActivationSoftmax ActivationType = 5
 )
 
-type Activation interface {
+type Differentiable interface {
 	F(float64) float64
 	Df(float64) float64
 }

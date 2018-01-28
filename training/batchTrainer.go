@@ -11,21 +11,21 @@ import (
 )
 
 type BatchTrainer struct {
+	*internalb
 	lr, lambda, momentum float64
-	*batchTraining
-	verbosity   int
-	batchSize   int
-	parallelism int
+	verbosity            int
+	batchSize            int
+	parallelism          int
 }
 
-type batchTraining struct {
+type internalb struct {
 	deltas            [][][]float64
 	partialDeltas     [][][][]float64
 	accumulatedDeltas [][][]float64
 	oldDeltas         [][][]float64
 }
 
-func newBatchTraining(layers []*deep.Layer, parallelism int) *batchTraining {
+func newBatchTraining(layers []*deep.Layer, parallelism int) *internalb {
 	deltas := make([][][]float64, parallelism)
 	partialDeltas := make([][][][]float64, parallelism)
 	accumulatedDeltas := make([][][]float64, len(layers))
@@ -46,7 +46,7 @@ func newBatchTraining(layers []*deep.Layer, parallelism int) *batchTraining {
 			}
 		}
 	}
-	return &batchTraining{
+	return &internalb{
 		deltas:            deltas,
 		oldDeltas:         oldDeltas,
 		partialDeltas:     partialDeltas,
@@ -72,7 +72,7 @@ func NewBatchTrainer(lr, lambda, momentum float64, verbosity, batchSize, paralle
 }
 
 func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iterations int) {
-	t.batchTraining = newBatchTraining(n.Layers, t.parallelism)
+	t.internalb = newBatchTraining(n.Layers, t.parallelism)
 
 	train := make(Examples, len(examples))
 	copy(train, examples)
@@ -139,7 +139,7 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 		t.deltas[wid][len(n.Layers)-1][i] = deep.GetLoss(n.Config.Loss).Df(
 			neuron.Value,
 			ideal[i],
-			deep.Act(neuron.A).Df(neuron.Value))
+			neuron.DActivate(neuron.Value))
 	}
 
 	for i := len(n.Layers) - 2; i >= 0; i-- {
@@ -148,7 +148,7 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 			for k, s := range neuron.Out {
 				sum += s.Weight * t.deltas[wid][i+1][k]
 			}
-			t.deltas[wid][i][j] = deep.Act(neuron.A).Df(neuron.Value) * sum
+			t.deltas[wid][i][j] = neuron.DActivate(neuron.Value) * sum
 		}
 	}
 
