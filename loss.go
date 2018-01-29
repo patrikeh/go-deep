@@ -75,7 +75,7 @@ func (l BinaryCrossEntropy) F(estimate, ideal [][]float64) float64 {
 		}
 		sum -= ce
 	}
-	return sum
+	return sum / float64(len(estimate))
 }
 
 func (l BinaryCrossEntropy) Df(estimate, ideal, activation float64) float64 {
