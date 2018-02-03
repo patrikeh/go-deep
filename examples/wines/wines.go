@@ -39,12 +39,12 @@ func main() {
 		Bias:       true,
 	})
 
-	//trainer := training.NewBatchTrainer(0.1, 0.0001, 0.5, 50, 50, 4)
-	trainer := training.NewTrainer(0.005, 0.00001, 0.9, 50)
+	trainer := training.NewBatchTrainer(training.NewSGD(0.005, 0.1, true), 50, 300, 4)
+	//trainer := training.NewTrainer(training.NewSGD(0.005, 0.5, true), 50)
 
-	//train, heldout := data.Split(0.65)
+	//data, heldout := data.Split(0.5)
 	heldout := data
-	trainer.Train(neural, data, data, 10000)
+	trainer.Train(neural, data, data, 7500)
 
 	correct := 0
 	for _, d := range heldout {

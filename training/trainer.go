@@ -11,38 +11,36 @@ import (
 
 type Trainer struct {
 	*internal
-	lr, lambda, momentum float64
-	verbosity            int
+	optimizer Optimizer
+	verbosity int
 }
 
-func NewTrainer(lr, lambda, momentum float64, verbosity int) *Trainer {
+func NewTrainer(optimizer Optimizer, verbosity int) *Trainer {
 	return &Trainer{
-		lr:        lr,
-		lambda:    lambda,
-		momentum:  momentum,
+		optimizer: optimizer,
 		verbosity: verbosity,
 	}
 }
 
 type internal struct {
-	deltas    [][]float64
-	oldDeltas [][][]float64
+	deltas  [][]float64
+	moments [][][]float64
 }
 
 func newTraining(layers []*deep.Layer) *internal {
 	deltas := make([][]float64, len(layers))
-	oldDeltas := make([][][]float64, len(layers))
+	moments := make([][][]float64, len(layers))
 
 	for i, l := range layers {
 		deltas[i] = make([]float64, len(l.Neurons))
-		oldDeltas[i] = make([][]float64, len(l.Neurons))
+		moments[i] = make([][]float64, len(l.Neurons))
 		for j, n := range l.Neurons {
-			oldDeltas[i][j] = make([]float64, len(n.In))
+			moments[i][j] = make([]float64, len(n.In))
 		}
 	}
 	return &internal{
-		deltas:    deltas,
-		oldDeltas: oldDeltas,
+		deltas:  deltas,
+		moments: moments,
 	}
 }
 
@@ -57,7 +55,7 @@ func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iteration
 
 	ts := time.Now()
 	for i := 0; i < iterations; i++ {
-		t.train(n, train, 1, t.lr, t.lambda, t.momentum)
+		t.train(n, train, 1)
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
 			loss := CrossValidate(n, validation)
 			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+t.verbosity, time.Since(ts).String(), loss)
@@ -66,11 +64,11 @@ func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iteration
 	}
 }
 
-func (t *Trainer) train(n *deep.Neural, examples Examples, epochs int, lr, lambda, momentum float64) {
+func (t *Trainer) train(n *deep.Neural, examples Examples, epochs int) {
 	for i := 0; i < epochs; i++ {
 		examples.Shuffle()
 		for j := 0; j < len(examples); j++ {
-			t.learn(n, examples[j], lr, lambda, momentum)
+			t.learn(n, examples[j])
 		}
 	}
 }
@@ -85,10 +83,10 @@ func CrossValidate(n *deep.Neural, validation Examples) float64 {
 	return deep.GetLoss(n.Config.Loss).F(predictions, responses)
 }
 
-func (t *Trainer) learn(n *deep.Neural, e Example, lr, lambda, momentum float64) {
+func (t *Trainer) learn(n *deep.Neural, e Example) {
 	n.Forward(e.Input)
 	t.calculateDeltas(n, e.Response)
-	t.update(n, lr, lambda, momentum)
+	t.update(n)
 }
 
 func (t *Trainer) calculateDeltas(n *deep.Neural, ideal []float64) {
@@ -110,17 +108,15 @@ func (t *Trainer) calculateDeltas(n *deep.Neural, ideal []float64) {
 	}
 }
 
-func (t *Trainer) update(n *deep.Neural, lr, lambda, momentum float64) {
+func (t *Trainer) update(n *deep.Neural) {
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
-				delta := lr*t.deltas[i][j]*l.Neurons[j].In[k].In + momentum*t.oldDeltas[i][j][k]
-				var reg float64
-				if !l.Neurons[j].In[k].IsBias {
-					reg = l.Neurons[j].In[k].Weight * lr * lambda
-				}
-				l.Neurons[j].In[k].Weight -= delta + reg
-				t.oldDeltas[i][j][k] = delta
+				update := t.optimizer.Update(l.Neurons[j].In[k].Weight,
+					t.deltas[i][j]*l.Neurons[j].In[k].In,
+					t.moments[i][j][k])
+				l.Neurons[j].In[k].Weight += update
+				t.moments[i][j][k] = update
 			}
 		}
 	}

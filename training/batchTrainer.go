@@ -12,35 +12,35 @@ import (
 
 type BatchTrainer struct {
 	*internalb
-	lr, lambda, momentum float64
-	verbosity            int
-	batchSize            int
-	parallelism          int
+	verbosity   int
+	batchSize   int
+	parallelism int
+	optimizer   Optimizer
 }
 
 type internalb struct {
 	deltas            [][][]float64
 	partialDeltas     [][][][]float64
 	accumulatedDeltas [][][]float64
-	oldDeltas         [][][]float64
+	moments           [][][]float64
 }
 
 func newBatchTraining(layers []*deep.Layer, parallelism int) *internalb {
 	deltas := make([][][]float64, parallelism)
 	partialDeltas := make([][][][]float64, parallelism)
 	accumulatedDeltas := make([][][]float64, len(layers))
-	oldDeltas := make([][][]float64, len(layers))
+	moments := make([][][]float64, len(layers))
 	for w := 0; w < parallelism; w++ {
 		deltas[w] = make([][]float64, len(layers))
 		partialDeltas[w] = make([][][]float64, len(layers))
 
 		for i, l := range layers {
 			deltas[w][i] = make([]float64, len(l.Neurons))
-			oldDeltas[i] = make([][]float64, len(l.Neurons))
+			moments[i] = make([][]float64, len(l.Neurons))
 			accumulatedDeltas[i] = make([][]float64, len(l.Neurons))
 			partialDeltas[w][i] = make([][]float64, len(l.Neurons))
 			for j, n := range l.Neurons {
-				oldDeltas[i][j] = make([]float64, len(n.In))
+				moments[i][j] = make([]float64, len(n.In))
 				partialDeltas[w][i][j] = make([]float64, len(n.In))
 				accumulatedDeltas[i][j] = make([]float64, len(n.In))
 			}
@@ -48,26 +48,18 @@ func newBatchTraining(layers []*deep.Layer, parallelism int) *internalb {
 	}
 	return &internalb{
 		deltas:            deltas,
-		oldDeltas:         oldDeltas,
+		moments:           moments,
 		partialDeltas:     partialDeltas,
 		accumulatedDeltas: accumulatedDeltas,
 	}
 }
 
-func NewBatchTrainer(lr, lambda, momentum float64, verbosity, batchSize, parallelism int) *BatchTrainer {
-	if parallelism == 0 {
-		parallelism = 1
-	}
-	if batchSize == 0 {
-		batchSize = 1
-	}
+func NewBatchTrainer(optimizer Optimizer, verbosity, batchSize, parallelism int) *BatchTrainer {
 	return &BatchTrainer{
-		lr:          lr,
-		lambda:      lambda,
-		momentum:    momentum,
+		optimizer:   optimizer,
 		verbosity:   verbosity,
-		batchSize:   batchSize,
-		parallelism: parallelism,
+		batchSize:   iparam(batchSize, 1),
+		parallelism: iparam(parallelism, 1),
 	}
 }
 
@@ -123,7 +115,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 				}
 			}
 
-			t.update(n, t.lr/float64(len(batches[i])), t.lambda, t.momentum)
+			t.update(n)
 		}
 
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
@@ -161,17 +153,15 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 	}
 }
 
-func (t *BatchTrainer) update(n *deep.Neural, lr, lambda, momentum float64) {
+func (t *BatchTrainer) update(n *deep.Neural) {
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
-				delta := lr*t.accumulatedDeltas[i][j][k] + momentum*t.oldDeltas[i][j][k]
-				var reg float64
-				if !l.Neurons[j].In[k].IsBias {
-					reg = l.Neurons[j].In[k].Weight * lr * lambda
-				}
-				l.Neurons[j].In[k].Weight -= delta + reg
-				t.oldDeltas[i][j][k] = delta
+				update := t.optimizer.Update(l.Neurons[j].In[k].Weight,
+					t.accumulatedDeltas[i][j][k],
+					t.moments[i][j][k])
+				l.Neurons[j].In[k].Weight += update
+				t.moments[i][j][k] = update
 				t.accumulatedDeltas[i][j][k] = 0
 			}
 		}
