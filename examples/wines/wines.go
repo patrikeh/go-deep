@@ -42,11 +42,11 @@ func main() {
 	//trainer := training.NewTrainer(training.NewSGD(0.005, 0.5, true), 50)
 	//trainer := training.NewBatchTrainer(training.NewSGD(0.005, 0.1, true), 50, 300, 4)
 	//trainer := training.NewTrainer(training.NewAdam(0.1, 0, 0, 0), 50)
-	trainer := training.NewBatchTrainer(training.NewAdam(0.1, 0, 0, 0), 50, 100, 4)
+	trainer := training.NewBatchTrainer(training.NewAdam(0, 0, 0, 0), 50, 100, 4)
 
 	//data, heldout := data.Split(0.5)
 	heldout := data
-	trainer.Train(neural, data, data, 7500)
+	trainer.Train(neural, data, data, 50000)
 
 	correct := 0
 	for _, d := range heldout {
