@@ -21,13 +21,13 @@ type LossType int
 func (l LossType) String() string {
 	switch l {
 	case LossCrossEntropy:
-		return "Cross Entropy"
+		return "CE"
 	case LossBinaryCrossEntropy:
-		return "Binary Cross Entropy"
+		return "BinCE"
 	case LossMeanSquared:
-		return "Mean Squared Error"
+		return "MSE"
 	}
-	return "Cross Entropy"
+	return "N/A"
 }
 
 const (

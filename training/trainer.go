@@ -1,9 +1,6 @@
 package training
 
 import (
-	"fmt"
-	"os"
-	"text/tabwriter"
 	"time"
 
 	deep "github.com/patrikeh/go-deep"
@@ -12,12 +9,14 @@ import (
 type Trainer struct {
 	*internal
 	optimizer Optimizer
+	printer   *StatsPrinter
 	verbosity int
 }
 
 func NewTrainer(optimizer Optimizer, verbosity int) *Trainer {
 	return &Trainer{
 		optimizer: optimizer,
+		printer:   NewStatsPrinter(),
 		verbosity: verbosity,
 	}
 }
@@ -50,16 +49,13 @@ func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iteration
 	train := make(Examples, len(examples))
 	copy(train, examples)
 
-	w := tabwriter.NewWriter(os.Stdout, 16, 0, 3, ' ', 0)
-	fmt.Fprintf(w, "Epochs\tElapsed\tLoss (%s)\t\n---\t---\t---\t\n", n.Config.Loss)
+	t.printer.Init(n)
 
 	ts := time.Now()
-	for i := 0; i < iterations; i++ {
+	for i := 0; i <= iterations; i++ {
 		t.train(n, train, 1)
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
-			loss := CrossValidate(n, validation)
-			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+t.verbosity, time.Since(ts).String(), loss)
-			w.Flush()
+			t.printer.PrintProgress(n, validation, time.Since(ts), i)
 		}
 	}
 }
@@ -71,16 +67,6 @@ func (t *Trainer) train(n *deep.Neural, examples Examples, epochs int) {
 			t.learn(n, examples[j])
 		}
 	}
-}
-
-func CrossValidate(n *deep.Neural, validation Examples) float64 {
-	predictions, responses := make([][]float64, len(validation)), make([][]float64, len(validation))
-	for i := 0; i < len(validation); i++ {
-		predictions[i] = n.Predict(validation[i].Input)
-		responses[i] = validation[i].Response
-	}
-
-	return deep.GetLoss(n.Config.Loss).F(predictions, responses)
 }
 
 func (t *Trainer) learn(n *deep.Neural, e Example) {

@@ -1,10 +1,7 @@
 package training
 
 import (
-	"fmt"
-	"os"
 	"sync"
-	"text/tabwriter"
 	"time"
 
 	deep "github.com/patrikeh/go-deep"
@@ -16,6 +13,7 @@ type BatchTrainer struct {
 	batchSize   int
 	parallelism int
 	optimizer   Optimizer
+	printer     *StatsPrinter
 }
 
 type internalb struct {
@@ -60,6 +58,7 @@ func NewBatchTrainer(optimizer Optimizer, verbosity, batchSize, parallelism int)
 		verbosity:   verbosity,
 		batchSize:   iparam(batchSize, 1),
 		parallelism: iparam(parallelism, 1),
+		printer:     NewStatsPrinter(),
 	}
 }
 
@@ -85,10 +84,9 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 		}(i, workCh)
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 16, 0, 3, ' ', 0)
-	fmt.Fprintf(w, "Epochs\tElapsed\tLoss (%s)\t\n---\t---\t---\t\n", n.Config.Loss)
+	t.printer.Init(n)
 	ts := time.Now()
-	for i := 0; i < iterations; i++ {
+	for i := 0; i <= iterations; i++ {
 		train.Shuffle()
 		batches := train.SplitSize(t.batchSize)
 
@@ -119,9 +117,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 		}
 
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
-			loss := CrossValidate(n, validation)
-			fmt.Fprintf(w, "%d\t%s\t%.5f\t\n", i+t.verbosity, time.Since(ts).String(), loss)
-			w.Flush()
+			t.printer.PrintProgress(n, validation, time.Since(ts), i)
 		}
 	}
 }
