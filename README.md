@@ -3,17 +3,14 @@ Feed forward/backpropagation neural network implementation. Currently supports:
 
 - Modular activation functions (sigmoid, hyperbolic, ReLU)
 - Classification modes: regression, multi-class, multi-label, binary
-- Momentum
-- Bias nodes
-- L2 regularization
+- Bias
 - Cross-validated training
-
+- Modular solvers (currently supports SGD, SGD with momentum/nesterov, Adam)
 Networks are modeled as a set of neurons connected through synapses. Consequently not the fastest implementation, but hopefully an intuitive one.
 
 Todo:
 - Dropout
 - Batch normalization
-- Optimizers other than SGD
 
 ## Usage
 Define some data...
@@ -53,8 +50,11 @@ n := deep.NewNeural(&deep.Config{
 ```
 Train:
 ```go
-// learning rate, weight decay, momentum, verbosity (print info at every n:th iteration)
-trainer := training.NewTrainer(0.5, 0, 0.1, 0)
+// params: learning rate, momentum, nesterov
+optimizer := training.NewSGD(0.05, 0.1, true)
+// params: optimizer, verbosity (print stats at every 50th iteration)
+trainer := training.NewTrainer(optimizer, 50)
+
 training, heldout := data.Split(0.5)
 trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ```
@@ -76,8 +76,10 @@ n.Predict(data[5].Input) => [0.9936341906634203]
 
 Alternatively, batch training can be performed in parallell:
 ```go
-// learning rate, weight decay, momentum, verbosity (print info at every n:th iteration), batch-size, number of workers
-trainer := training.NewBatchTrainer(0.01, 0.0001, 0.5, 1, 200, 4)
+optimizer := NewAdam(0.001, 0.9, 0.999, 1e-8)
+// params: optimizer, verbosity (print info at every n:th iteration), batch-size, number of workers
+trainer := training.NewBatchTrainer(optimizer, 1, 200, 4)
+
 training, heldout := data.Split(0.75)
 trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ```

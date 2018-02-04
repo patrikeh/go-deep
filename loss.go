@@ -21,13 +21,13 @@ type LossType int
 func (l LossType) String() string {
 	switch l {
 	case LossCrossEntropy:
-		return "Cross Entropy"
+		return "CE"
 	case LossBinaryCrossEntropy:
-		return "Binary Cross Entropy"
+		return "BinCE"
 	case LossMeanSquared:
-		return "Mean Squared Error"
+		return "MSE"
 	}
-	return "Cross Entropy"
+	return "N/A"
 }
 
 const (
@@ -71,7 +71,7 @@ func (l BinaryCrossEntropy) F(estimate, ideal [][]float64) float64 {
 	for i := range estimate {
 		ce := 0.0
 		for j := range estimate[i] {
-			ce += ideal[i][j] * (math.Log(estimate[i][j]+epsilon) - (1-ideal[i][j])*math.Log(1-estimate[i][j]+epsilon))
+			ce += ideal[i][j] * (math.Log(estimate[i][j]+epsilon) - (1.0-ideal[i][j])*math.Log(1.0-estimate[i][j]+epsilon))
 		}
 		sum -= ce
 	}
