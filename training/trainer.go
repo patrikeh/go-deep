@@ -94,7 +94,8 @@ func (t *Trainer) update(n *deep.Neural) {
 			for k := range l.Neurons[j].In {
 				update := t.optimizer.Update(l.Neurons[j].In[k].Weight,
 					t.deltas[i][j]*l.Neurons[j].In[k].In,
-					t.moments[i][j][k])
+					t.moments[i][j][k],
+					i+j+k)
 				l.Neurons[j].In[k].Weight += update
 				t.moments[i][j][k] = update
 			}
