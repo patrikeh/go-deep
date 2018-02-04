@@ -53,18 +53,12 @@ func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iteration
 
 	ts := time.Now()
 	for i := 0; i <= iterations; i++ {
-		t.train(n, train, 1)
-		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
-			t.printer.PrintProgress(n, validation, time.Since(ts), i)
-		}
-	}
-}
-
-func (t *Trainer) train(n *deep.Neural, examples Examples, epochs int) {
-	for i := 0; i < epochs; i++ {
 		examples.Shuffle()
 		for j := 0; j < len(examples); j++ {
 			t.learn(n, examples[j])
+		}
+		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
+			t.printer.PrintProgress(n, validation, time.Since(ts), i)
 		}
 	}
 }
