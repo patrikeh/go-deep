@@ -2,14 +2,15 @@ package training
 
 import "math"
 
-type Optimizer interface {
-	Update(value, gradient, moment float64, idx int) float64
+type Solver interface {
+	Update(value, gradient float64, idx int) float64
 }
 
 type SGD struct {
 	lr       float64
 	momentum float64
 	nesterov bool
+	moments  map[int]float64
 }
 
 func NewSGD(lr, momentum float64, nesterov bool) *SGD {
@@ -17,17 +18,18 @@ func NewSGD(lr, momentum float64, nesterov bool) *SGD {
 		lr:       fparam(lr, 0.01),
 		momentum: momentum,
 		nesterov: nesterov,
+		moments:  make(map[int]float64),
 	}
 }
 
-func (o *SGD) Update(value, gradient, moment float64, idx int) float64 {
-	update := o.momentum*moment - o.lr*gradient
+func (o *SGD) Update(value, gradient float64, idx int) float64 {
+	o.moments[idx] = o.momentum*o.moments[idx] - o.lr*gradient
 
 	if o.nesterov {
-		return o.momentum*update - o.lr*gradient
+		o.moments[idx] = o.momentum*o.moments[idx] - o.lr*gradient
 	}
 
-	return update
+	return o.moments[idx]
 }
 
 type Adam struct {
@@ -51,7 +53,7 @@ func NewAdam(lr, beta, beta2, epsilon float64) *Adam {
 	}
 }
 
-func (o *Adam) Update(value, gradient, moment float64, idx int) float64 {
+func (o *Adam) Update(value, gradient float64, idx int) float64 {
 	o.t++
 	lr_t := o.lr * (math.Sqrt(1.0 - math.Pow(o.beta2, o.t))) /
 		(1.0 - math.Pow(o.beta, o.t))

@@ -8,38 +8,30 @@ import (
 
 type Trainer struct {
 	*internal
-	optimizer Optimizer
+	solver    Solver
 	printer   *StatsPrinter
 	verbosity int
 }
 
-func NewTrainer(optimizer Optimizer, verbosity int) *Trainer {
+func NewTrainer(solver Solver, verbosity int) *Trainer {
 	return &Trainer{
-		optimizer: optimizer,
+		solver:    solver,
 		printer:   NewStatsPrinter(),
 		verbosity: verbosity,
 	}
 }
 
 type internal struct {
-	deltas  [][]float64
-	moments [][][]float64
+	deltas [][]float64
 }
 
 func newTraining(layers []*deep.Layer) *internal {
 	deltas := make([][]float64, len(layers))
-	moments := make([][][]float64, len(layers))
-
 	for i, l := range layers {
 		deltas[i] = make([]float64, len(l.Neurons))
-		moments[i] = make([][]float64, len(l.Neurons))
-		for j, n := range l.Neurons {
-			moments[i][j] = make([]float64, len(n.In))
-		}
 	}
 	return &internal{
-		deltas:  deltas,
-		moments: moments,
+		deltas: deltas,
 	}
 }
 
@@ -89,15 +81,15 @@ func (t *Trainer) calculateDeltas(n *deep.Neural, ideal []float64) {
 }
 
 func (t *Trainer) update(n *deep.Neural) {
+	var idx int
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
-				update := t.optimizer.Update(l.Neurons[j].In[k].Weight,
+				update := t.solver.Update(l.Neurons[j].In[k].Weight,
 					t.deltas[i][j]*l.Neurons[j].In[k].In,
-					t.moments[i][j][k],
-					i+j+k)
+					idx)
 				l.Neurons[j].In[k].Weight += update
-				t.moments[i][j][k] = update
+				idx++
 			}
 		}
 	}

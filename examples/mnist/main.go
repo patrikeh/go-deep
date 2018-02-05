@@ -48,7 +48,7 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(train[0].Input),
-		Layout:     []int{30, 10},
+		Layout:     []int{800, 800, 10},
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMultiClass,
 		Weight:     deep.NewNormal(0.6, 0.1), // slight positive bias helps ReLU

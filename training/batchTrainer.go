@@ -12,7 +12,7 @@ type BatchTrainer struct {
 	verbosity   int
 	batchSize   int
 	parallelism int
-	optimizer   Optimizer
+	solver      Solver
 	printer     *StatsPrinter
 }
 
@@ -27,18 +27,15 @@ func newBatchTraining(layers []*deep.Layer, parallelism int) *internalb {
 	deltas := make([][][]float64, parallelism)
 	partialDeltas := make([][][][]float64, parallelism)
 	accumulatedDeltas := make([][][]float64, len(layers))
-	moments := make([][][]float64, len(layers))
 	for w := 0; w < parallelism; w++ {
 		deltas[w] = make([][]float64, len(layers))
 		partialDeltas[w] = make([][][]float64, len(layers))
 
 		for i, l := range layers {
 			deltas[w][i] = make([]float64, len(l.Neurons))
-			moments[i] = make([][]float64, len(l.Neurons))
 			accumulatedDeltas[i] = make([][]float64, len(l.Neurons))
 			partialDeltas[w][i] = make([][]float64, len(l.Neurons))
 			for j, n := range l.Neurons {
-				moments[i][j] = make([]float64, len(n.In))
 				partialDeltas[w][i][j] = make([]float64, len(n.In))
 				accumulatedDeltas[i][j] = make([]float64, len(n.In))
 			}
@@ -46,15 +43,14 @@ func newBatchTraining(layers []*deep.Layer, parallelism int) *internalb {
 	}
 	return &internalb{
 		deltas:            deltas,
-		moments:           moments,
 		partialDeltas:     partialDeltas,
 		accumulatedDeltas: accumulatedDeltas,
 	}
 }
 
-func NewBatchTrainer(optimizer Optimizer, verbosity, batchSize, parallelism int) *BatchTrainer {
+func NewBatchTrainer(solver Solver, verbosity, batchSize, parallelism int) *BatchTrainer {
 	return &BatchTrainer{
-		optimizer:   optimizer,
+		solver:      solver,
 		verbosity:   verbosity,
 		batchSize:   iparam(batchSize, 1),
 		parallelism: iparam(parallelism, 1),
@@ -150,16 +146,16 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 }
 
 func (t *BatchTrainer) update(n *deep.Neural) {
+	var idx int
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
-				update := t.optimizer.Update(l.Neurons[j].In[k].Weight,
+				update := t.solver.Update(l.Neurons[j].In[k].Weight,
 					t.accumulatedDeltas[i][j][k],
-					t.moments[i][j][k],
-					i+j+k)
+					idx)
 				l.Neurons[j].In[k].Weight += update
-				t.moments[i][j][k] = update
 				t.accumulatedDeltas[i][j][k] = 0
+				idx++
 			}
 		}
 	}
