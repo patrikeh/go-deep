@@ -45,17 +45,7 @@ func main() {
 	trainer := training.NewBatchTrainer(training.NewAdam(0, 0, 0, 0), 50, 100, 12)
 
 	//data, heldout := data.Split(0.5)
-	heldout := data
-	trainer.Train(neural, data, data, 5000)
-
-	correct := 0
-	for _, d := range heldout {
-		est := neural.Predict(d.Input)
-		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
-			correct++
-		}
-	}
-	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(heldout)))
+	trainer.Train(neural, data, data, 7500)
 }
 
 func load(path string) (training.Examples, error) {

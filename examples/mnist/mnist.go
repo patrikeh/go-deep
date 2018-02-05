@@ -48,30 +48,19 @@ func main() {
 
 	neural := deep.NewNeural(&deep.Config{
 		Inputs:     len(train[0].Input),
-		Layout:     []int{800, 800, 10},
+		Layout:     []int{100, 10},
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMultiClass,
 		Weight:     deep.NewNormal(0.6, 0.1), // slight positive bias helps ReLU
 		Bias:       true,
 	})
 
-	trainer := training.NewBatchTrainer(training.NewAdam(0.01, 0.9, 0.999, 1e-8), 1, 100, 4)
+	trainer := training.NewBatchTrainer(training.NewAdam(0.01, 0.9, 0.999, 1e-8), 1, 200, 8)
 	//trainer := training.NewTrainer(training.NewSGD(0.01, 0.5, true), 1)
 
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
-	//p := profile.Start()
+
 	trainer.Train(neural, train, test, 500)
-	//p.Stop()
-
-	correct := 0
-	for _, d := range test {
-		est := neural.Predict(d.Input)
-		if deep.ArgMax(d.Response) == deep.ArgMax(est) {
-			correct++
-		}
-	}
-	fmt.Printf("accuracy: %.2f\n", float64(correct)/float64(len(test)))
-
 }
 
 func load(path string) (training.Examples, error) {
