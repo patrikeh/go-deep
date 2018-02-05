@@ -42,6 +42,7 @@ func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iteration
 	copy(train, examples)
 
 	t.printer.Init(n)
+	t.solver.Init(n.NumWeights())
 
 	ts := time.Now()
 	for i := 0; i <= iterations; i++ {

@@ -117,6 +117,15 @@ func (n *Neural) Predict(input []float64) []float64 {
 	return out
 }
 
+func (n *Neural) NumWeights() (num int) {
+	for i := range n.Layers {
+		for j := range n.Layers[i].Neurons {
+			num += len(n.Layers[i].Neurons[j].In)
+		}
+	}
+	return
+}
+
 func (n *Neural) String() string {
 	var s string
 	for _, l := range n.Layers {

@@ -3,6 +3,7 @@ package training
 import "math"
 
 type Solver interface {
+	Init(size int)
 	Update(value, gradient float64, idx int) float64
 }
 
@@ -10,7 +11,7 @@ type SGD struct {
 	lr       float64
 	momentum float64
 	nesterov bool
-	moments  map[int]float64
+	moments  []float64
 }
 
 func NewSGD(lr, momentum float64, nesterov bool) *SGD {
@@ -18,8 +19,11 @@ func NewSGD(lr, momentum float64, nesterov bool) *SGD {
 		lr:       fparam(lr, 0.01),
 		momentum: momentum,
 		nesterov: nesterov,
-		moments:  make(map[int]float64),
 	}
+}
+
+func (o *SGD) Init(size int) {
+	o.moments = make([]float64, size)
 }
 
 func (o *SGD) Update(value, gradient float64, idx int) float64 {
@@ -38,7 +42,7 @@ type Adam struct {
 	beta2   float64
 	epsilon float64
 
-	v, m map[int]float64
+	v, m []float64
 	t    float64
 }
 
@@ -48,9 +52,11 @@ func NewAdam(lr, beta, beta2, epsilon float64) *Adam {
 		beta:    fparam(beta, 0.9),
 		beta2:   fparam(beta2, 0.999),
 		epsilon: fparam(epsilon, 1e-8),
-		v:       make(map[int]float64),
-		m:       make(map[int]float64),
 	}
+}
+
+func (o *Adam) Init(size int) {
+	o.v, o.m = make([]float64, size), make([]float64, size)
 }
 
 func (o *Adam) Update(value, gradient float64, idx int) float64 {

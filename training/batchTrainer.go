@@ -81,6 +81,8 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 	}
 
 	t.printer.Init(n)
+	t.solver.Init(n.NumWeights())
+
 	ts := time.Now()
 	for i := 0; i <= iterations; i++ {
 		train.Shuffle()
