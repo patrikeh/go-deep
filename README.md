@@ -1,11 +1,12 @@
 # go-deep
 Feed forward/backpropagation neural network implementation. Currently supports:
 
-- Modular activation functions (sigmoid, hyperbolic, ReLU)
+- Activation functions: sigmoid, hyperbolic, ReLU
+- Solvers: SGD, SGD with momentum/nesterov, Adam
 - Classification modes: regression, multi-class, multi-label, binary
-- Bias
-- Cross-validated training
-- Modular solvers (currently supports SGD, SGD with momentum/nesterov, Adam)
+- Bias nodes
+- Supports batch training in parallel
+
 Networks are modeled as a set of neurons connected through synapses. Consequently not the fastest implementation, but hopefully an intuitive one.
 
 Todo:
@@ -87,7 +88,7 @@ trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ## Examples
 See ```training/trainer_test.go``` for a variety of toy examples of regression, multi-class classification, binary classification, etc.
 
-See ```examples/``` for realistic examples:
+See ```examples/``` for more realistic examples:
 
 | Dataset | Topology | Epochs | Accuracy |
 | --- | --- | --- | --- |
