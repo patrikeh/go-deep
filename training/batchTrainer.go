@@ -84,7 +84,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 	t.solver.Init(n.NumWeights())
 
 	ts := time.Now()
-	for i := 1; i <= iterations; i++ {
+	for it := 1; it <= iterations; it++ {
 		train.Shuffle()
 		batches := train.SplitSize(t.batchSize)
 
@@ -111,11 +111,11 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 				}
 			}
 
-			t.update(n, i)
+			t.update(n, it)
 		}
 
-		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
-			t.printer.PrintProgress(n, validation, time.Since(ts), i)
+		if t.verbosity > 0 && it%t.verbosity == 0 && len(validation) > 0 {
+			t.printer.PrintProgress(n, validation, time.Since(ts), it)
 		}
 	}
 }

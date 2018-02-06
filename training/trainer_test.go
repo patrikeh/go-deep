@@ -60,8 +60,8 @@ func Test_RegressionLinearOuts(t *testing.T) {
 		Bias:       true,
 	})
 
-	trainer := NewBatchTrainer(NewAdam(0, 0, 0, 0), 0, 50, 2)
-	trainer.Train(n, squares, nil, 500)
+	trainer := NewBatchTrainer(NewAdam(0.01, 0, 0, 0), 0, 25, 2)
+	trainer.Train(n, squares, nil, 2500)
 
 	for i := 0; i < 100; i++ {
 		x := float64(rand.Intn(99) + 1)

@@ -39,10 +39,10 @@ func main() {
 		Bias:       true,
 	})
 
-	trainer := training.NewTrainer(training.NewSGD(0.005, 0.5, 1e-6, true), 50)
+	//trainer := training.NewTrainer(training.NewSGD(0.005, 0.5, 1e-6, true), 50)
 	//trainer := training.NewBatchTrainer(training.NewSGD(0.005, 0.1, 0, true), 50, 300, 16)
 	//trainer := training.NewTrainer(training.NewAdam(0.1, 0, 0, 0), 50)
-	//trainer := training.NewBatchTrainer(training.NewAdam(0.1, 0, 0, 0), 50, len(data)/2, 12)
+	trainer := training.NewBatchTrainer(training.NewAdam(0.1, 0, 0, 0), 50, len(data)/2, 12)
 	//data, heldout := data.Split(0.5)
 	trainer.Train(neural, data, data, 5000)
 }
