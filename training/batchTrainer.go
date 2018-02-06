@@ -84,7 +84,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 	t.solver.Init(n.NumWeights())
 
 	ts := time.Now()
-	for i := 0; i <= iterations; i++ {
+	for i := 1; i <= iterations; i++ {
 		train.Shuffle()
 		batches := train.SplitSize(t.batchSize)
 
@@ -154,7 +154,7 @@ func (t *BatchTrainer) update(n *deep.Neural, it int) {
 			for k := range l.Neurons[j].In {
 				update := t.solver.Update(l.Neurons[j].In[k].Weight,
 					t.accumulatedDeltas[i][j][k],
-					it+1,
+					it,
 					idx)
 				l.Neurons[j].In[k].Weight += update
 				t.accumulatedDeltas[i][j][k] = 0

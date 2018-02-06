@@ -60,8 +60,8 @@ func Test_RegressionLinearOuts(t *testing.T) {
 		Bias:       true,
 	})
 
-	trainer := NewTrainer(NewSGD(0.001, 0.5, 0, true), 0)
-	trainer.Train(n, squares, nil, 15000)
+	trainer := NewBatchTrainer(NewAdam(0, 0, 0, 0), 0, 50, 2)
+	trainer.Train(n, squares, nil, 500)
 
 	for i := 0; i < 100; i++ {
 		x := float64(rand.Intn(99) + 1)
@@ -231,7 +231,7 @@ func Test_xor(t *testing.T) {
 		{[]float64{1, 1}, []float64{0}},
 	}
 
-	trainer := NewTrainer(NewSGD(1.0, 0.1, 0, false), 50)
+	trainer := NewTrainer(NewSGD(1.0, 0.1, 1e-6, false), 50)
 	trainer.Train(n, permutations, permutations, 500)
 
 	for _, perm := range permutations {

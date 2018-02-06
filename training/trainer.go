@@ -45,7 +45,7 @@ func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iteration
 	t.solver.Init(n.NumWeights())
 
 	ts := time.Now()
-	for i := 0; i <= iterations; i++ {
+	for i := 1; i <= iterations; i++ {
 		examples.Shuffle()
 		for j := 0; j < len(examples); j++ {
 			t.learn(n, examples[j], i)
@@ -88,7 +88,7 @@ func (t *Trainer) update(n *deep.Neural, it int) {
 			for k := range l.Neurons[j].In {
 				update := t.solver.Update(l.Neurons[j].In[k].Weight,
 					t.deltas[i][j]*l.Neurons[j].In[k].In,
-					it+1,
+					it,
 					idx)
 				l.Neurons[j].In[k].Weight += update
 				idx++
