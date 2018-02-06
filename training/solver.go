@@ -4,19 +4,21 @@ import "math"
 
 type Solver interface {
 	Init(size int)
-	Update(value, gradient float64, idx int) float64
+	Update(value, gradient float64, iteration, idx int) float64
 }
 
 type SGD struct {
 	lr       float64
+	decay    float64
 	momentum float64
 	nesterov bool
 	moments  []float64
 }
 
-func NewSGD(lr, momentum float64, nesterov bool) *SGD {
+func NewSGD(lr, momentum, decay float64, nesterov bool) *SGD {
 	return &SGD{
 		lr:       fparam(lr, 0.01),
+		decay:    decay,
 		momentum: momentum,
 		nesterov: nesterov,
 	}
@@ -26,11 +28,13 @@ func (o *SGD) Init(size int) {
 	o.moments = make([]float64, size)
 }
 
-func (o *SGD) Update(value, gradient float64, idx int) float64 {
-	o.moments[idx] = o.momentum*o.moments[idx] - o.lr*gradient
+func (o *SGD) Update(value, gradient float64, iteration, idx int) float64 {
+	lr := o.lr / (1 + o.decay*float64(iteration))
+
+	o.moments[idx] = o.momentum*o.moments[idx] - lr*gradient
 
 	if o.nesterov {
-		o.moments[idx] = o.momentum*o.moments[idx] - o.lr*gradient
+		o.moments[idx] = o.momentum*o.moments[idx] - lr*gradient
 	}
 
 	return o.moments[idx]
@@ -43,7 +47,6 @@ type Adam struct {
 	epsilon float64
 
 	v, m []float64
-	t    float64
 }
 
 func NewAdam(lr, beta, beta2, epsilon float64) *Adam {
@@ -59,10 +62,9 @@ func (o *Adam) Init(size int) {
 	o.v, o.m = make([]float64, size), make([]float64, size)
 }
 
-func (o *Adam) Update(value, gradient float64, idx int) float64 {
-	o.t++
-	lr_t := o.lr * (math.Sqrt(1.0 - math.Pow(o.beta2, o.t))) /
-		(1.0 - math.Pow(o.beta, o.t))
+func (o *Adam) Update(value, gradient float64, t, idx int) float64 {
+	lr_t := o.lr * (math.Sqrt(1.0 - math.Pow(o.beta2, float64(t)))) /
+		(1.0 - math.Pow(o.beta, float64(t)))
 	o.m[idx] = o.beta*o.m[idx] + (1.0-o.beta)*gradient
 	o.v[idx] = o.beta2*o.v[idx] + (1.0-o.beta2)*math.Pow(gradient, 2.0)
 

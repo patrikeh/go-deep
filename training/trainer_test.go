@@ -34,7 +34,7 @@ func Test_BoundedRegression(t *testing.T) {
 			Bias:       true,
 		})
 
-		trainer := NewTrainer(NewSGD(0.25, 0.5, false), 0)
+		trainer := NewTrainer(NewSGD(0.25, 0.5, 0, false), 0)
 		trainer.Train(n, data, nil, 5000)
 
 		tests := []float64{0.0, 0.1, 0.25, 0.5, 0.75, 0.9}
@@ -60,7 +60,7 @@ func Test_RegressionLinearOuts(t *testing.T) {
 		Bias:       true,
 	})
 
-	trainer := NewTrainer(NewSGD(0.001, 0.5, true), 0)
+	trainer := NewTrainer(NewSGD(0.001, 0.5, 0, true), 0)
 	trainer.Train(n, squares, nil, 15000)
 
 	for i := 0; i < 100; i++ {
@@ -88,7 +88,7 @@ func Test_Training(t *testing.T) {
 		Bias:       true,
 	})
 
-	trainer := NewTrainer(NewSGD(0.5, 0.1, false), 0)
+	trainer := NewTrainer(NewSGD(0.5, 0.1, 0, false), 0)
 	trainer.Train(n, data, nil, 1000)
 
 	v := n.Predict([]float64{0})
@@ -120,7 +120,7 @@ func Test_Prediction(t *testing.T) {
 		Weight:     deep.NewUniform(0.5, 0),
 		Bias:       true,
 	})
-	trainer := NewTrainer(NewSGD(0.5, 0.1, false), 0)
+	trainer := NewTrainer(NewSGD(0.5, 0.1, 0, false), 0)
 
 	trainer.Train(n, data, nil, 5000)
 
@@ -139,7 +139,7 @@ func Test_CrossVal(t *testing.T) {
 		Bias:       true,
 	})
 
-	trainer := NewTrainer(NewSGD(0.5, 0.1, false), 0)
+	trainer := NewTrainer(NewSGD(0.5, 0.1, 0, false), 0)
 	trainer.Train(n, data, data, 1000)
 
 	for _, d := range data {
@@ -172,7 +172,7 @@ func Test_MultiClass(t *testing.T) {
 		Bias:       true,
 	})
 
-	trainer := NewTrainer(NewSGD(0.01, 0.1, false), 0)
+	trainer := NewTrainer(NewSGD(0.01, 0.1, 0, false), 0)
 	trainer.Train(n, data, data, 1000)
 
 	for _, d := range data {
@@ -205,7 +205,7 @@ func Test_or(t *testing.T) {
 		{[]float64{1, 1}, []float64{1}},
 	}
 
-	trainer := NewTrainer(NewSGD(0.5, 0, false), 10)
+	trainer := NewTrainer(NewSGD(0.5, 0, 0, false), 10)
 
 	trainer.Train(n, permutations, permutations, 25)
 
@@ -231,7 +231,7 @@ func Test_xor(t *testing.T) {
 		{[]float64{1, 1}, []float64{0}},
 	}
 
-	trainer := NewTrainer(NewSGD(1.0, 0.1, false), 50)
+	trainer := NewTrainer(NewSGD(1.0, 0.1, 0, false), 50)
 	trainer.Train(n, permutations, permutations, 500)
 
 	for _, perm := range permutations {

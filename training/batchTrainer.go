@@ -111,7 +111,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 				}
 			}
 
-			t.update(n)
+			t.update(n, i)
 		}
 
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
@@ -147,13 +147,14 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 	}
 }
 
-func (t *BatchTrainer) update(n *deep.Neural) {
+func (t *BatchTrainer) update(n *deep.Neural, it int) {
 	var idx int
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
 			for k := range l.Neurons[j].In {
 				update := t.solver.Update(l.Neurons[j].In[k].Weight,
 					t.accumulatedDeltas[i][j][k],
+					it+1,
 					idx)
 				l.Neurons[j].In[k].Weight += update
 				t.accumulatedDeltas[i][j][k] = 0
