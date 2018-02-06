@@ -50,8 +50,8 @@ n := deep.NewNeural(&deep.Config{
 ```
 Train:
 ```go
-// params: learning rate, momentum, nesterov
-optimizer := training.NewSGD(0.05, 0.1, true)
+// params: learning rate, momentum, nesterov, alpha decay
+optimizer := training.NewSGD(0.05, 0.1, 1e-6, true)
 // params: optimizer, verbosity (print stats at every 50th iteration)
 trainer := training.NewTrainer(optimizer, 50)
 
