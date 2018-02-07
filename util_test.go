@@ -15,3 +15,43 @@ func Test_softmax(t *testing.T) {
 		assert.InEpsilon(t, e[i], s[i], 0.05)
 	}
 }
+
+func Test_Standardize(t *testing.T) {
+
+	s := []float64{10.0, 5.0, 0.0}
+
+	assert.Equal(t, Mean(s), 5.0)
+	assert.Equal(t, StandardDeviation(s), 5.0)
+
+	Standardize(s)
+
+	zscores := []float64{1, 0, -1}
+
+	for i, x := range s {
+		assert.Equal(t, zscores[i], x)
+	}
+}
+
+func Test_Normalize(t *testing.T) {
+
+	s := []float64{10.0, 5.0, 0.0}
+
+	assert.Equal(t, Mean(s), 5.0)
+	assert.Equal(t, StandardDeviation(s), 5.0)
+
+	Normalize(s)
+
+	zscores := []float64{1, 0.5, 0}
+
+	for i, x := range s {
+		assert.Equal(t, zscores[i], x)
+	}
+}
+
+func Test_MinMax(t *testing.T) {
+	s := []float64{10.0, 5.0, 0.0}
+
+	assert.Equal(t, 0.0, Min(s))
+	assert.Equal(t, 10.0, Max(s))
+	assert.Equal(t, 0, ArgMax(s))
+}

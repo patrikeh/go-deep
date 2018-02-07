@@ -6,13 +6,14 @@ import (
 	"github.com/golang/glog"
 )
 
+// Neural is a neural network
 type Neural struct {
 	Layers []*Layer
 	Biases [][]*Synapse
 	Config *Config
 }
 
-// Defines network topology, activations, losses etc
+// Config defines the network topology, activations, losses etc
 type Config struct {
 	// Number of inputs
 	Inputs int
@@ -33,6 +34,7 @@ type Config struct {
 	Bias bool
 }
 
+// NewNeural returns a new neural network
 func NewNeural(c *Config) *Neural {
 
 	if c.Weight == nil {
@@ -107,6 +109,7 @@ func (n *Neural) fire() {
 	}
 }
 
+// Forward computes a forward pass
 func (n *Neural) Forward(input []float64) {
 	if len(input) != n.Config.Inputs {
 		glog.Errorf("Invalid input dimension - expected: %d got: %d", n.Config.Inputs, len(input))
@@ -119,7 +122,7 @@ func (n *Neural) Forward(input []float64) {
 	n.fire()
 }
 
-// Predict makes a forward pass and returns a prediction
+// Predict computes a forward pass and returns a prediction
 func (n *Neural) Predict(input []float64) []float64 {
 	n.Forward(input)
 
