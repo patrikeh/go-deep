@@ -45,7 +45,7 @@ n := deep.NewNeural(&deep.Config{
 	ModeMultiClass: softmax output with Cross Entropy loss
 	ModeMultiLabel: sigmoid output with Cross Entropy loss
 	ModeBinary: sigmoid output with binary CE loss */
-	Mode: ModeBinary,
+	Mode: deep.ModeBinary,
 	/* Weight initializers: {deep.NewNormal(μ, σ), deep.NewUniform(μ, σ)} */
 	Weight: deep.NewNormal(1.0, 0.0),
 	/* Apply bias */
