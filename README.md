@@ -10,7 +10,7 @@ Feed forward/backpropagation neural network implementation. Currently supports:
 - Supports batch training in parallel
 - Bias nodes
 
-Networks are modeled as a set of neurons connected through synapses. Consequently not the fastest implementation, but hopefully an intuitive one. No GPU computations - this is more or less useless for any large scale applications.
+Networks are modeled as a set of neurons connected through synapses. No GPU computations - don't use this for any large scale applications.
 
 Todo:
 - Dropout
