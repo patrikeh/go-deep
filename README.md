@@ -38,7 +38,7 @@ n := deep.NewNeural(&deep.Config{
 	Inputs: 2,
 	/* Two hidden layers consisting of two neurons each, and a single output */
 	Layout: []int{2, 2, 1},
-	/* Activation functions, available options are {deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear} */
+	/* Activation functions: {deep.Sigmoid, deep.Tanh, deep.ReLU, deep.Linear} */
 	Activation: deep.Sigmoid,
 	/* Determines output layer activation & loss function: 
 	ModeRegression: linear outputs with MSE loss
@@ -54,7 +54,7 @@ n := deep.NewNeural(&deep.Config{
 ```
 Train:
 ```go
-// params: learning rate, momentum, nesterov, alpha decay
+// params: learning rate, momentum, alpha decay, nesterov
 optimizer := training.NewSGD(0.05, 0.1, 1e-6, true)
 // params: optimizer, verbosity (print stats at every 50th iteration)
 trainer := training.NewTrainer(optimizer, 50)
