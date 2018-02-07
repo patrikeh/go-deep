@@ -144,7 +144,7 @@ func Test_CrossVal(t *testing.T) {
 
 	for _, d := range data {
 		assert.InEpsilon(t, n.Predict(d.Input)[0]+1, d.Response[0]+1, 0.1)
-		assert.InEpsilon(t, 1, CrossValidate(n, data)+1, 0.01)
+		assert.InEpsilon(t, 1, crossValidate(n, data)+1, 0.01)
 	}
 }
 
@@ -183,7 +183,7 @@ func Test_MultiClass(t *testing.T) {
 		} else {
 			assert.InEpsilon(t, n.Predict(d.Input)[1]+1, d.Response[1]+1, 0.1)
 		}
-		assert.InEpsilon(t, 1, CrossValidate(n, data)+1, 0.01)
+		assert.InEpsilon(t, 1, crossValidate(n, data)+1, 0.01)
 	}
 
 }
