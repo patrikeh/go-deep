@@ -19,7 +19,7 @@ func NewStatsPrinter() *StatsPrinter {
 	return &StatsPrinter{tabwriter.NewWriter(os.Stdout, 16, 0, 3, ' ', 0)}
 }
 
-// Init initalizes printer
+// Init initializes printer
 func (p *StatsPrinter) Init(n *deep.Neural) {
 	fmt.Fprintf(p.w, "Epochs\tElapsed\tLoss (%s)\t", n.Config.Loss)
 	if n.Config.Mode == deep.ModeMultiClass {

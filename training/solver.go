@@ -27,7 +27,7 @@ func NewSGD(lr, momentum, decay float64, nesterov bool) *SGD {
 	}
 }
 
-// Init initalizes vectors using number of weights in network
+// Init initializes vectors using number of weights in network
 func (o *SGD) Init(size int) {
 	o.moments = make([]float64, size)
 }
@@ -65,7 +65,7 @@ func NewAdam(lr, beta, beta2, epsilon float64) *Adam {
 	}
 }
 
-// Init initalizes vectors using number of weights in network
+// Init initializes vectors using number of weights in network
 func (o *Adam) Init(size int) {
 	o.v, o.m = make([]float64, size), make([]float64, size)
 }
