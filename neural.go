@@ -12,24 +12,31 @@ type Neural struct {
 	Config *Config
 }
 
+// Defines network topology, activations, losses etc
 type Config struct {
-	Inputs     int
-	Layout     []int
+	// Number of inputs
+	Inputs int
+	// Defines topology:
+	// For instance, [5 3 3] signifies a network with two hidden layers
+	// containing 5 and 3 nodes respectively, followed an output layer
+	// containing 3 nodes.
+	Layout []int
+	// Activation functions: {ActivationTanh, ActivationReLU, ActivationSigmoid}
 	Activation ActivationType
-	Mode       Mode
-	Weight     WeightInitializer `json:"-"`
-	Loss       LossType
-	Bias       bool
+	// Solver modes: {ModeRegression, ModeBinary, ModeMultiClass, ModeMultiLabel}
+	Mode Mode
+	// Initializer for weights: {NewNormal(σ, μ), NewUniform(σ, μ)}
+	Weight WeightInitializer `json:"-"`
+	// Loss functions: {LossCrossEntropy, LossBinaryCrossEntropy, LossMeanSquared}
+	Loss LossType
+	// Apply bias nodes
+	Bias bool
 }
 
 func NewNeural(c *Config) *Neural {
 
 	if c.Weight == nil {
-		mean := 0.0
-		if c.Activation == ActivationReLU {
-			mean = 0.1
-		}
-		c.Weight = NewUniform(0.5, mean)
+		c.Weight = NewUniform(0.5, 0)
 	}
 	if c.Activation == ActivationNone {
 		c.Activation = ActivationSigmoid
@@ -45,6 +52,27 @@ func NewNeural(c *Config) *Neural {
 		}
 	}
 
+	layers := initializeLayers(c)
+
+	var biases [][]*Synapse
+	if c.Bias {
+		biases = make([][]*Synapse, len(layers))
+		for i := 0; i < len(layers); i++ {
+			if c.Mode == ModeRegression && i == len(layers)-1 {
+				continue
+			}
+			biases[i] = layers[i].ApplyBias(c.Weight)
+		}
+	}
+
+	return &Neural{
+		Layers: layers,
+		Biases: biases,
+		Config: c,
+	}
+}
+
+func initializeLayers(c *Config) []*Layer {
 	layers := make([]*Layer, len(c.Layout))
 	for i := range layers {
 		act := c.Activation
@@ -65,32 +93,17 @@ func NewNeural(c *Config) *Neural {
 		}
 	}
 
-	var biases [][]*Synapse
-	if c.Bias {
-		biases = make([][]*Synapse, len(layers))
-		for i := 0; i < len(layers); i++ {
-			if c.Mode == ModeRegression && i == len(layers)-1 {
-				continue
-			}
-			biases[i] = layers[i].ApplyBias(c.Weight)
-		}
-	}
-
-	return &Neural{
-		Layers: layers,
-		Biases: biases,
-		Config: c,
-	}
+	return layers
 }
 
-func (n *Neural) Fire() {
+func (n *Neural) fire() {
 	for i := range n.Biases {
 		for j := range n.Biases[i] {
-			n.Biases[i][j].Fire(1)
+			n.Biases[i][j].fire(1)
 		}
 	}
 	for _, l := range n.Layers {
-		l.Fire()
+		l.fire()
 	}
 }
 
@@ -100,12 +113,13 @@ func (n *Neural) Forward(input []float64) {
 	}
 	for _, n := range n.Layers[0].Neurons {
 		for i := 0; i < len(input); i++ {
-			n.In[i].Fire(input[i])
+			n.In[i].fire(input[i])
 		}
 	}
-	n.Fire()
+	n.fire()
 }
 
+// Predict makes a forward pass and returns a prediction
 func (n *Neural) Predict(input []float64) []float64 {
 	n.Forward(input)
 
@@ -117,6 +131,7 @@ func (n *Neural) Predict(input []float64) []float64 {
 	return out
 }
 
+// NumWeights returns the number of weights in the network
 func (n *Neural) NumWeights() (num int) {
 	for i := range n.Layers {
 		for j := range n.Layers[i].Neurons {

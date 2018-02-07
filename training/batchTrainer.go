@@ -7,6 +7,7 @@ import (
 	deep "github.com/patrikeh/go-deep"
 )
 
+// BatchTrainer implements parallelized batch training
 type BatchTrainer struct {
 	*internalb
 	verbosity   int
@@ -48,6 +49,7 @@ func newBatchTraining(layers []*deep.Layer, parallelism int) *internalb {
 	}
 }
 
+// NewBatchTrainer returns a BatchTrainer
 func NewBatchTrainer(solver Solver, verbosity, batchSize, parallelism int) *BatchTrainer {
 	return &BatchTrainer{
 		solver:      solver,
@@ -58,6 +60,7 @@ func NewBatchTrainer(solver Solver, verbosity, batchSize, parallelism int) *Batc
 	}
 }
 
+// Train trains n
 func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iterations int) {
 	t.internalb = newBatchTraining(n.Layers, t.parallelism)
 

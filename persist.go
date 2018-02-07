@@ -9,6 +9,7 @@ type Dump struct {
 	Weights [][][]float64
 }
 
+// ApplyWeights sets the weights from a three-dimensional slice
 func (n *Neural) ApplyWeights(weights [][][]float64) {
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
@@ -19,6 +20,7 @@ func (n *Neural) ApplyWeights(weights [][][]float64) {
 	}
 }
 
+// Weights returns all weights in sequence
 func (n Neural) Weights() [][][]float64 {
 	weights := make([][][]float64, len(n.Layers))
 	for i, l := range n.Layers {
@@ -33,6 +35,7 @@ func (n Neural) Weights() [][][]float64 {
 	return weights
 }
 
+// Dump generates a network dump
 func (n Neural) Dump() *Dump {
 	return &Dump{
 		Config:  n.Config,
@@ -40,6 +43,7 @@ func (n Neural) Dump() *Dump {
 	}
 }
 
+// FromDump restores a Neural from a dump
 func FromDump(dump *Dump) *Neural {
 	n := NewNeural(dump.Config)
 	n.ApplyWeights(dump.Weights)
@@ -47,11 +51,12 @@ func FromDump(dump *Dump) *Neural {
 	return n
 }
 
+// Marshal marshals to JSON from network
 func (n Neural) Marshal() ([]byte, error) {
-	d := n.Dump()
-	return json.Marshal(d)
+	return json.Marshal(n.Dump())
 }
 
+// Unmarshal restores network from a JSON blob
 func Unmarshal(bytes []byte) (*Neural, error) {
 	var dump Dump
 	if err := json.Unmarshal(bytes, &dump); err != nil {

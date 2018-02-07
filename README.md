@@ -1,4 +1,6 @@
 # go-deep
+[![Go Report Card](https://goreportcard.com/badge/github.com/patrikeh/go-deep)](https://goreportcard.com/report/github.com/patrikeh/go-deep)
+[![Build Status](https://travis-ci.org/patrikeh/go-deep.svg?branch=master)](https://travis-ci.org/patrikeh/go-deep)
 Feed forward/backpropagation neural network implementation. Currently supports:
 
 - Activation functions: sigmoid, hyperbolic, ReLU
@@ -43,7 +45,7 @@ n := deep.NewNeural(&deep.Config{
 	ModeMultiLabel: sigmoid output with Cross Entropy loss
 	ModeBinary: sigmoid output with binary CE loss */
 	Mode: ModeBinary,
-	/* Weight initializers: {deep.NewNormal(stdDev, mean), deep.NewUniform(stdDev, mean)} */
+	/* Weight initializers: {deep.NewNormal(μ, σ), deep.NewUniform(μ, σ)} */
 	Weight: deep.NewNormal(1.0, 0.0),
 	/* Apply bias */
 	Bias: true,

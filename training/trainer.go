@@ -6,6 +6,7 @@ import (
 	deep "github.com/patrikeh/go-deep"
 )
 
+// Trainer is a basic, online network trainer
 type Trainer struct {
 	*internal
 	solver    Solver
@@ -13,6 +14,7 @@ type Trainer struct {
 	verbosity int
 }
 
+// NewTrainer creates a new trainer
 func NewTrainer(solver Solver, verbosity int) *Trainer {
 	return &Trainer{
 		solver:    solver,
@@ -35,6 +37,7 @@ func newTraining(layers []*deep.Layer) *internal {
 	}
 }
 
+// Train trains n
 func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iterations int) {
 	t.internal = newTraining(n.Layers)
 

@@ -2,11 +2,13 @@ package deep
 
 import "fmt"
 
+// Layer is a set of neurons and corresponding activation
 type Layer struct {
 	Neurons []*Neuron
 	A       ActivationType
 }
 
+// NewLayer creates a new layer with n nodes
 func NewLayer(n int, activation ActivationType) *Layer {
 	neurons := make([]*Neuron, n)
 
@@ -23,9 +25,9 @@ func NewLayer(n int, activation ActivationType) *Layer {
 	}
 }
 
-func (l *Layer) Fire() {
+func (l *Layer) fire() {
 	for _, n := range l.Neurons {
-		n.Fire()
+		n.fire()
 	}
 	if l.A == ActivationSoftmax {
 		outs := make([]float64, len(l.Neurons))
@@ -39,6 +41,8 @@ func (l *Layer) Fire() {
 	}
 }
 
+// Connect fully connects layer l to next, and initializes each
+// synapse with the given weight function
 func (l *Layer) Connect(next *Layer, weight WeightInitializer) {
 	for i := range l.Neurons {
 		for j := range next.Neurons {
@@ -49,6 +53,7 @@ func (l *Layer) Connect(next *Layer, weight WeightInitializer) {
 	}
 }
 
+// ApplyBias creates and returns a bias synapse for each neuron in l
 func (l *Layer) ApplyBias(weight WeightInitializer) []*Synapse {
 	biases := make([]*Synapse, len(l.Neurons))
 	for i := range l.Neurons {

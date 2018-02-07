@@ -5,13 +5,19 @@ import "math"
 type Mode int
 
 const (
-	ModeDefault    Mode = 0 // Use default output layer activations
-	ModeMultiClass Mode = 1 // Softmax output layer for multiclass classification
-	ModeRegression Mode = 2 // Linear output layer
-	ModeBinary     Mode = 3 // Sigmoid output layer for binary classification
-	ModeMultiLabel Mode = 4 // Sigmoid output layer with multiclass CE (no softmax)
+	// ModeDefault is unspecified mode
+	ModeDefault Mode = 0
+	// ModeMultiClass is for one-hot encoded classification, applies softmax output layer
+	ModeMultiClass Mode = 1
+	// ModeRegression is regression, applies linear output layer
+	ModeRegression Mode = 2
+	// ModeBinary is binary classification, applies sigmoid output layer
+	ModeBinary Mode = 3
+	// ModeMultiLabel is for multilabel classification, applies sigmoid output layer
+	ModeMultiLabel Mode = 4
 )
 
+// OutputActivation returns activation corresponding to prediction mode
 func OutputActivation(c Mode) ActivationType {
 	switch c {
 	case ModeMultiClass:
@@ -24,6 +30,7 @@ func OutputActivation(c Mode) ActivationType {
 	return ActivationNone
 }
 
+// GetActivation returns the concrete activation given an ActivationType
 func GetActivation(act ActivationType) Differentiable {
 	switch act {
 	case ActivationSigmoid:
@@ -40,6 +47,7 @@ func GetActivation(act ActivationType) Differentiable {
 	return Linear{}
 }
 
+// ActivationType is represents a neuron activation function
 type ActivationType int
 
 const (
@@ -51,28 +59,43 @@ const (
 	ActivationSoftmax ActivationType = 5
 )
 
+// Differentiable is an activation function and its first order derivative,
+// where the latter is expressed as a function of the former for efficiency
 type Differentiable interface {
 	F(float64) float64
 	Df(float64) float64
 }
 
+// Sigmoid is a logistic activator in the special case of a = 1
 type Sigmoid struct{}
 
-func (a Sigmoid) F(x float64) float64  { return Logistic(x, 1) }
+// F is Sigmoid(x)
+func (a Sigmoid) F(x float64) float64 { return Logistic(x, 1) }
+
+// Df is Sigmoid'(y), where y = Sigmoid(x)
 func (a Sigmoid) Df(y float64) float64 { return y * (1 - y) }
 
+// Logistic is the logistic function
 func Logistic(x, a float64) float64 {
 	return 1 / (1 + math.Exp(-a*x))
 }
 
+// Tanh is a hyperbolic activator
 type Tanh struct{}
 
-func (a Tanh) F(x float64) float64  { return (1 - math.Exp(-2*x)) / (1 + math.Exp(-2*x)) }
+// F is Tanh(x)
+func (a Tanh) F(x float64) float64 { return (1 - math.Exp(-2*x)) / (1 + math.Exp(-2*x)) }
+
+// Df is Tanh'(y), where y = Tanh(x)
 func (a Tanh) Df(y float64) float64 { return 1 - math.Pow(y, 2) }
 
+// ReLU is a rectified linear unit activator
 type ReLU struct{}
 
+// F is ReLU(x)
 func (a ReLU) F(x float64) float64 { return math.Max(x, 0) }
+
+// Df is ReLU'(y), where y = ReLU(x)
 func (a ReLU) Df(y float64) float64 {
 	if y > 0 {
 		return 1
@@ -80,7 +103,11 @@ func (a ReLU) Df(y float64) float64 {
 	return 0
 }
 
+// Linear is a linear activator
 type Linear struct{}
 
-func (a Linear) F(x float64) float64  { return x }
+// F is the identity function
+func (a Linear) F(x float64) float64 { return x }
+
+// Df is constant
 func (a Linear) Df(x float64) float64 { return 1 }
