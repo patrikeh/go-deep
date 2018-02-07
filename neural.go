@@ -12,24 +12,31 @@ type Neural struct {
 	Config *Config
 }
 
+// Defines network topology, activations, losses etc
 type Config struct {
-	Inputs     int
-	Layout     []int
+	// Number of inputs
+	Inputs int
+	// Defines topology:
+	// For instance, [5 3 3] signifies a network with two hidden layers
+	// containing 5 and 3 nodes respectively, followed an output layer
+	// containing 3 nodes.
+	Layout []int
+	// Activation functions: {ActivationTanh, ActivationReLU, ActivationSigmoid}
 	Activation ActivationType
-	Mode       Mode
-	Weight     WeightInitializer `json:"-"`
-	Loss       LossType
-	Bias       bool
+	// Solver modes: {ModeRegression, ModeBinary, ModeMultiClass, ModeMultiLabel}
+	Mode Mode
+	// Initializer for weights: {NewNormal(σ, μ), NewUniform(σ, μ)}
+	Weight WeightInitializer `json:"-"`
+	// Loss functions: {LossCrossEntropy, LossBinaryCrossEntropy, LossMeanSquared}
+	Loss LossType
+	// Apply bias nodes
+	Bias bool
 }
 
 func NewNeural(c *Config) *Neural {
 
 	if c.Weight == nil {
-		mean := 0.0
-		if c.Activation == ActivationReLU {
-			mean = 0.1
-		}
-		c.Weight = NewUniform(0.5, mean)
+		c.Weight = NewUniform(0.5, 0)
 	}
 	if c.Activation == ActivationNone {
 		c.Activation = ActivationSigmoid

@@ -1,4 +1,5 @@
 # go-deep
+[![Go Report Card](https://goreportcard.com/badge/github.com/patrikeh/go-deep)](https://goreportcard.com/report/github.com/patrikeh/go-deep)
 Feed forward/backpropagation neural network implementation. Currently supports:
 
 - Activation functions: sigmoid, hyperbolic, ReLU
