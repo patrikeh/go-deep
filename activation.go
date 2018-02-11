@@ -2,6 +2,7 @@ package deep
 
 import "math"
 
+// Mode denotes inference mode
 type Mode int
 
 const (
@@ -51,11 +52,17 @@ func GetActivation(act ActivationType) Differentiable {
 type ActivationType int
 
 const (
-	ActivationNone    ActivationType = 0
+	// ActivationNone is no activation
+	ActivationNone ActivationType = 0
+	// ActivationSigmoid is a sigmoid activation
 	ActivationSigmoid ActivationType = 1
-	ActivationTanh    ActivationType = 2
-	ActivationReLU    ActivationType = 3
-	ActivationLinear  ActivationType = 4
+	// ActivationTanh is hyperbolic activation
+	ActivationTanh ActivationType = 2
+	// ActivationReLU is rectified linear unit activation
+	ActivationReLU ActivationType = 3
+	// ActivationLinear is linear activation
+	ActivationLinear ActivationType = 4
+	// ActivationSoftmax is a softmax activation (per layer)
 	ActivationSoftmax ActivationType = 5
 )
 

@@ -72,12 +72,12 @@ func (o *Adam) Init(size int) {
 
 // Update returns the update for a given weight
 func (o *Adam) Update(value, gradient float64, t, idx int) float64 {
-	lr_t := o.lr * (math.Sqrt(1.0 - math.Pow(o.beta2, float64(t)))) /
+	lrt := o.lr * (math.Sqrt(1.0 - math.Pow(o.beta2, float64(t)))) /
 		(1.0 - math.Pow(o.beta, float64(t)))
 	o.m[idx] = o.beta*o.m[idx] + (1.0-o.beta)*gradient
 	o.v[idx] = o.beta2*o.v[idx] + (1.0-o.beta2)*math.Pow(gradient, 2.0)
 
-	return -lr_t * (o.m[idx] / (math.Sqrt(o.v[idx]) + o.epsilon))
+	return -lrt * (o.m[idx] / (math.Sqrt(o.v[idx]) + o.epsilon))
 }
 
 func fparam(val, fallback float64) float64 {

@@ -2,8 +2,6 @@ package deep
 
 import (
 	"fmt"
-
-	"github.com/golang/glog"
 )
 
 // Neural is a neural network
@@ -110,9 +108,9 @@ func (n *Neural) fire() {
 }
 
 // Forward computes a forward pass
-func (n *Neural) Forward(input []float64) {
+func (n *Neural) Forward(input []float64) error {
 	if len(input) != n.Config.Inputs {
-		glog.Errorf("Invalid input dimension - expected: %d got: %d", n.Config.Inputs, len(input))
+		return fmt.Errorf("Invalid input dimension - expected: %d got: %d", n.Config.Inputs, len(input))
 	}
 	for _, n := range n.Layers[0].Neurons {
 		for i := 0; i < len(input); i++ {
@@ -120,6 +118,7 @@ func (n *Neural) Forward(input []float64) {
 		}
 	}
 	n.fire()
+	return nil
 }
 
 // Predict computes a forward pass and returns a prediction

@@ -1,6 +1,7 @@
 # go-deep
 [![Go Report Card](https://goreportcard.com/badge/github.com/patrikeh/go-deep)](https://goreportcard.com/report/github.com/patrikeh/go-deep)
 [![Build Status](https://travis-ci.org/patrikeh/go-deep.svg?branch=master)](https://travis-ci.org/patrikeh/go-deep)
+[![Coverage Status](https://coveralls.io/repos/github/patrikeh/go-deep/badge.svg?branch=master)](https://coveralls.io/github/patrikeh/go-deep?branch=master)
 
 Feed forward/backpropagation neural network implementation. Currently supports:
 

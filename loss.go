@@ -109,6 +109,6 @@ func (l MeanSquared) F(estimate, ideal [][]float64) float64 {
 }
 
 // Df is MSE'(...)
-func (l MeanSquared) Df(estimate, ideal, activationGrad float64) float64 {
-	return activationGrad * (estimate - ideal)
+func (l MeanSquared) Df(estimate, ideal, activation float64) float64 {
+	return activation * (estimate - ideal)
 }
