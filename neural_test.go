@@ -11,6 +11,7 @@ func Test_Init(t *testing.T) {
 		Inputs:     3,
 		Layout:     []int{4, 4, 2},
 		Activation: ActivationTanh,
+		Mode:       ModeBinary,
 		Weight:     NewUniform(0.5, 0),
 		Bias:       true,
 	})
@@ -27,6 +28,7 @@ func Test_Forward(t *testing.T) {
 		Layout:     []int{3, 3, 3},
 		Activation: ActivationReLU,
 		Mode:       ModeMultiClass,
+		Weight:     NewNormal(1.0, 0),
 		Bias:       true,
 	})
 	weights := [][][]float64{
@@ -62,7 +64,8 @@ func Test_Forward(t *testing.T) {
 		}
 	}
 
-	n.Forward([]float64{0.1, 0.2, 0.7})
+	err := n.Forward([]float64{0.1, 0.2, 0.7})
+	assert.Nil(t, err)
 
 	expected := [][]float64{
 		{1.3, 1.66, 1.72},
@@ -75,6 +78,8 @@ func Test_Forward(t *testing.T) {
 		}
 	}
 
+	err = n.Forward([]float64{0.1, 0.2})
+	assert.Error(t, err)
 }
 
 func Test_NumWeights(t *testing.T) {

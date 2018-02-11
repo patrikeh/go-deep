@@ -1,5 +1,7 @@
 language: go
 sudo: false
+before_install:
+  - go get github.com/mattn/goveralls
 install:
   - go get -v github.com/Masterminds/glide
   - cd $GOPATH/src/github.com/Masterminds/glide && git checkout 3e13fd16ed5b0808ba0fb2e4bd98eb325ccde0a1 && go install && cd -
@@ -8,3 +10,4 @@ before_script:
   - go vet ./...
 script:
   - go test -v ./...
+  - $GOPATH/bin/goveralls -ignore=examples/ -service=travis-ci

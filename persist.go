@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// Dump is a neural network dump
 type Dump struct {
 	Config  *Config
 	Weights [][][]float64
