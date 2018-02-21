@@ -6,8 +6,13 @@ import (
 	deep "github.com/patrikeh/go-deep"
 )
 
-// Trainer is a basic, online network trainer
-type Trainer struct {
+// Trainer is a neural network trainer
+type Trainer interface {
+	Train(n *deep.Neural, examples, validation Examples, iterations int)
+}
+
+// OnlineTrainer is a basic, online network trainer
+type OnlineTrainer struct {
 	*internal
 	solver    Solver
 	printer   *StatsPrinter
@@ -15,8 +20,8 @@ type Trainer struct {
 }
 
 // NewTrainer creates a new trainer
-func NewTrainer(solver Solver, verbosity int) *Trainer {
-	return &Trainer{
+func NewTrainer(solver Solver, verbosity int) *OnlineTrainer {
+	return &OnlineTrainer{
 		solver:    solver,
 		printer:   NewStatsPrinter(),
 		verbosity: verbosity,
@@ -38,7 +43,7 @@ func newTraining(layers []*deep.Layer) *internal {
 }
 
 // Train trains n
-func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iterations int) {
+func (t *OnlineTrainer) Train(n *deep.Neural, examples, validation Examples, iterations int) {
 	t.internal = newTraining(n.Layers)
 
 	train := make(Examples, len(examples))
@@ -59,13 +64,13 @@ func (t *Trainer) Train(n *deep.Neural, examples, validation Examples, iteration
 	}
 }
 
-func (t *Trainer) learn(n *deep.Neural, e Example, it int) {
+func (t *OnlineTrainer) learn(n *deep.Neural, e Example, it int) {
 	n.Forward(e.Input)
 	t.calculateDeltas(n, e.Response)
 	t.update(n, it)
 }
 
-func (t *Trainer) calculateDeltas(n *deep.Neural, ideal []float64) {
+func (t *OnlineTrainer) calculateDeltas(n *deep.Neural, ideal []float64) {
 	for i, neuron := range n.Layers[len(n.Layers)-1].Neurons {
 		t.deltas[len(n.Layers)-1][i] = deep.GetLoss(n.Config.Loss).Df(
 			neuron.Value,
@@ -84,7 +89,7 @@ func (t *Trainer) calculateDeltas(n *deep.Neural, ideal []float64) {
 	}
 }
 
-func (t *Trainer) update(n *deep.Neural, it int) {
+func (t *OnlineTrainer) update(n *deep.Neural, it int) {
 	var idx int
 	for i, l := range n.Layers {
 		for j := range l.Neurons {
