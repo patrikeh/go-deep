@@ -14,15 +14,6 @@ import (
 	"strconv"
 )
 
-func compareexample(e1, e2 []float64 ) bool {
-	for n1, _:= range(e1) {
-		if (e1[n1] != e2[n1]) {
-			return false;
-		}
-	}
-	return true
-}
-
 func main() {
 
 	rand.Seed(time.Now().UnixNano())
@@ -32,16 +23,6 @@ func main() {
 		panic(err)
 	}
 
-	// for n1, j:= range(data) {
-	// 	for n2, x:= range(data) {
-	// 		if n1 != n2 && compareexample(j.Input,x.Input) {
-	// 			fmt.Println(x)
-	// 		}
-	// 	}
-	// }
-	//data.Shuffle()
-	//fmt.Println(data)
-
 	fmt.Printf("have %d entries\n", len(data))
 
 	neural := deep.NewNeural(&deep.Config{
@@ -50,37 +31,11 @@ func main() {
 		Activation: deep.ActivationSigmoid,
 		Mode:       deep.ModeBinary,
 		Weight:     deep.NewNormal(1, 0),
-		//Bias:       true,
 	})
 
 	trainer := training.NewBatchTrainer(training.NewAdam(0.02, 0.9, 0.999, 1e-8), 10, 500, 16)
 	trainer.Train(neural, data, data, 6000)
-	// c := 0
-	// for i:=0 ; i<len(data); i++ {
-	// 	v := neural.Predict(data[i].Input)
-	// 	output := 0
-	// 	for k:=0 ; k < 9 ; k++ {
-	// 		if data[i].Response[k] == 1 {
-	// 			output = k
-	// 		}
-	// 	}
-	// 	rez := 0.0
-	// 	index := 0
-	// 	for indext, j:= range(v) {
-	// 		if j> rez {
-	// 			rez = j
-	// 			index = indext
-	// 		}
-	// 	}
 
-	// 	if index != output {
-	// 		 c++
-	// 		 //fmt.Println(v, "output:", output, "index: ", index)
-	// 		 //fmt.Println(data[i].Response)
-	// 	}
-
-	// }
-	//fmt.Println("count: ", c)
 	dump, err := neural.Marshal()
 	ioutil.WriteFile("t3.nimi", dump, 0644)
 }
