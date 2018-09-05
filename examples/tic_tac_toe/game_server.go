@@ -1,7 +1,6 @@
 package main
 
 import (
-    //"fmt"
     "io/ioutil"
     "log"
     "net/http"
@@ -9,7 +8,6 @@ import (
     "encoding/json"
     "github.com/patrikeh/go-deep"
     "strings"
-    //"math"
     "strconv"
 )
 
@@ -152,7 +150,6 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
     }
     renderTemplate(w, "game", varmap)
 }
-
 
 func main() {
     b, err := ioutil.ReadFile("trained/ttt_complete_for_o.nimi")
