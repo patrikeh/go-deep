@@ -74,7 +74,7 @@ func Test_Forward(t *testing.T) {
 	}
 	for i := range n.Layers {
 		for j, n := range n.Layers[i].Neurons {
-			assert.Equal(t, expected[i][j], n.Value)
+			assert.InEpsilon(t, expected[i][j], n.Value, 1e-12)
 		}
 	}
 
