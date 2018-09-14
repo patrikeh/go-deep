@@ -1,6 +1,7 @@
 package deep
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,12 +30,13 @@ func Test_Loss(t *testing.T) {
 			loss:   LossBinaryCrossEntropy,
 			input:  [][]float64{{0.5}},
 			target: [][]float64{{0.5}},
-			res:    0.175,
+			res:    0.69,
 		},
 	}
 	for _, test := range tests {
 		loss := GetLoss(test.loss)
-		assert.InEpsilon(t, loss.F(test.input, test.target), test.res, 1e-1)
+		estimate := loss.F(test.input, test.target)
+		assert.InEpsilon(t, test.res, estimate, 1e-1, fmt.Sprintf("%s estimate: %.2f expected: %.2f", test.loss.String(), estimate, test.res))
 		assert.NotEqual(t, "N/A", test.loss.String())
 	}
 }
