@@ -1,0 +1,20 @@
+
+
+table{
+    border: 1px solid black;
+    width: 300px;
+    height:300px
+}
+
+tr td {
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    vertical-align: center;
+    font-size: 80px !important;
+    font-weight: bold;
+}
+
+.game_over {
+    display: none;
+}
