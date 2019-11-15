@@ -19,10 +19,23 @@ Todo:
 - Dropout
 - Batch normalization
 
+##Install
+```
+go get -u github.com/patrikeh/go-deep
+```
 ## Usage
+Import the go-deep package
+```go
+import (
+	"fmt"
+	deep "github.com/patrikeh/go-deep"
+	"github.com/patrikeh/go-deep/training"
+)
+```
+
 Define some data...
 ```go
-var data = []Example{
+var data = training.Examples{
 	{[]float64{2.7810836, 2.550537003}, []float64{0}},
 	{[]float64{1.465489372, 2.362125076}, []float64{0}},
 	{[]float64{3.396561688, 4.400293529}, []float64{0}},
@@ -77,8 +90,8 @@ Epochs        Elapsed       Error
 ```
 Finally, make some predictions:
 ```go
-n.Predict(data[0].Input) => [0.0058055785217672636]
-n.Predict(data[5].Input) => [0.9936341906634203]
+fmt.Println(data[0].Input, "=>", n.Predict(data[0].Input))
+fmt.Println(data[5].Input, "=>", n.Predict(data[5].Input))
 ```
 
 Alternatively, batch training can be performed in parallell:
