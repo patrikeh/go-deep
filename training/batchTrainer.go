@@ -1,6 +1,7 @@
 package training
 
 import (
+	"math"
 	"sync"
 	"time"
 
@@ -137,7 +138,11 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 			for k, s := range neuron.Out {
 				sum += s.Weight * t.deltas[wid][i+1][k]
 			}
-			t.deltas[wid][i][j] = neuron.DActivate(neuron.Value) * sum
+			if math.IsNaN(neuron.DActivate(neuron.Value) * sum) {
+				t.deltas[wid][i][j] = neuron.DActivate(neuron.Value)
+			} else {
+				t.deltas[wid][i][j] = neuron.DActivate(neuron.Value) * sum
+			}
 		}
 	}
 
@@ -159,7 +164,9 @@ func (t *BatchTrainer) update(n *deep.Neural, it int) {
 					t.accumulatedDeltas[i][j][k],
 					it,
 					idx)
-				l.Neurons[j].In[k].Weight += update
+				if !math.IsNaN(l.Neurons[j].In[k].Weight + update) {
+					l.Neurons[j].In[k].Weight += update
+				}
 				t.accumulatedDeltas[i][j][k] = 0
 				idx++
 			}

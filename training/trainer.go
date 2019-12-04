@@ -1,6 +1,7 @@
 package training
 
 import (
+	"math"
 	"time"
 
 	deep "github.com/patrikeh/go-deep"
@@ -85,6 +86,11 @@ func (t *OnlineTrainer) calculateDeltas(n *deep.Neural, ideal []float64) {
 				sum += s.Weight * t.deltas[i+1][k]
 			}
 			t.deltas[i][j] = neuron.DActivate(neuron.Value) * sum
+			if math.IsNaN(neuron.DActivate(neuron.Value) * sum) {
+				t.deltas[i][j] = neuron.DActivate(neuron.Value)
+			} else {
+				t.deltas[i][j] = neuron.DActivate(neuron.Value) * sum
+			}
 		}
 	}
 }
@@ -98,7 +104,9 @@ func (t *OnlineTrainer) update(n *deep.Neural, it int) {
 					t.deltas[i][j]*l.Neurons[j].In[k].In,
 					it,
 					idx)
-				l.Neurons[j].In[k].Weight += update
+				if !math.IsNaN(l.Neurons[j].In[k].Weight + update) {
+					l.Neurons[j].In[k].Weight += update
+				}
 				idx++
 			}
 		}
