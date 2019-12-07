@@ -98,8 +98,8 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 				n.ApplyWeights(currentWeights)
 			}
 
+			wg.Add(len(b))
 			for _, item := range b {
-				wg.Add(1)
 				workCh <- item
 			}
 			wg.Wait()
