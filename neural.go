@@ -97,9 +97,9 @@ func initializeLayers(c *Config) []*Layer {
 }
 
 func (n *Neural) fire() {
-	for i := range n.Biases {
-		for j := range n.Biases[i] {
-			n.Biases[i][j].fire(1)
+	for _, b := range n.Biases {
+		for _, s := range b {
+			s.fire(1)
 		}
 	}
 	for _, l := range n.Layers {
@@ -135,9 +135,9 @@ func (n *Neural) Predict(input []float64) []float64 {
 
 // NumWeights returns the number of weights in the network
 func (n *Neural) NumWeights() (num int) {
-	for i := range n.Layers {
-		for j := range n.Layers[i].Neurons {
-			num += len(n.Layers[i].Neurons[j].In)
+	for _, l := range n.Layers {
+		for _, n := range l.Neurons {
+			num += len(n.In)
 		}
 	}
 	return
