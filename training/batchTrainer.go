@@ -67,7 +67,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 	train := make(Examples, len(examples))
 	copy(train, examples)
 
-	workCh := make(chan Example)
+	workCh := make(chan Example, t.parallelism)
 	nets := make([]*deep.Neural, t.parallelism)
 
 	wg := sync.WaitGroup{}
