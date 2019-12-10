@@ -19,7 +19,7 @@ Todo:
 - Dropout
 - Batch normalization
 
-##Install
+## Install
 ```
 go get -u github.com/patrikeh/go-deep
 ```
