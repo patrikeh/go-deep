@@ -67,7 +67,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 	train := make(Examples, len(examples))
 	copy(train, examples)
 
-	workCh := make(chan Example)
+	workCh := make(chan Example, t.parallelism)
 	nets := make([]*deep.Neural, t.parallelism)
 
 	wg := sync.WaitGroup{}
@@ -75,9 +75,10 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 		nets[i] = deep.NewNeural(n.Config)
 
 		go func(id int, workCh <-chan Example) {
+			n := nets[id]
 			for e := range workCh {
-				nets[id].Forward(e.Input)
-				t.calculateDeltas(nets[id], e.Response, id)
+				n.Forward(e.Input)
+				t.calculateDeltas(n, e.Response, id)
 				wg.Done()
 			}
 		}(i, workCh)
@@ -91,24 +92,26 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 		train.Shuffle()
 		batches := train.SplitSize(t.batchSize)
 
-		for i := 0; i < len(batches); i++ {
+		for _, b := range batches {
 			currentWeights := n.Weights()
-			for i := range nets {
-				nets[i].ApplyWeights(currentWeights)
+			for _, n := range nets {
+				n.ApplyWeights(currentWeights)
 			}
 
-			for _, item := range batches[i] {
-				wg.Add(1)
+			wg.Add(len(b))
+			for _, item := range b {
 				workCh <- item
 			}
 			wg.Wait()
 
-			for w := range t.partialDeltas {
-				for i := range t.partialDeltas[w] {
-					for j := range t.partialDeltas[w][i] {
-						for k, v := range t.partialDeltas[w][i][j] {
-							t.accumulatedDeltas[i][j][k] += v
-							t.partialDeltas[w][i][j][k] = 0
+			for _, wPD := range t.partialDeltas {
+				for i, iPD := range wPD {
+					iAD := t.accumulatedDeltas[i]
+					for j, jPD := range iPD {
+						jAD := iAD[j]
+						for k, v := range jPD {
+							jAD[k] += v
+							jPD[k] = 0
 						}
 					}
 				}
@@ -124,27 +127,39 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 }
 
 func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int) {
-	for i, neuron := range n.Layers[len(n.Layers)-1].Neurons {
-		t.deltas[wid][len(n.Layers)-1][i] = deep.GetLoss(n.Config.Loss).Df(
-			neuron.Value,
+	loss := deep.GetLoss(n.Config.Loss)
+	deltas := t.deltas[wid]
+	partialDeltas := t.partialDeltas[wid]
+	lastDeltas := deltas[len(n.Layers)-1]
+
+	for i, n := range n.Layers[len(n.Layers)-1].Neurons {
+		lastDeltas[i] = loss.Df(
+			n.Value,
 			ideal[i],
-			neuron.DActivate(neuron.Value))
+			n.DActivate(n.Value))
 	}
 
 	for i := len(n.Layers) - 2; i >= 0; i-- {
-		for j, neuron := range n.Layers[i].Neurons {
+		l := n.Layers[i]
+		iD := deltas[i]
+		nextD := deltas[i+1]
+		for j, n := range l.Neurons {
 			var sum float64
-			for k, s := range neuron.Out {
-				sum += s.Weight * t.deltas[wid][i+1][k]
+			for k, s := range n.Out {
+				sum += s.Weight * nextD[k]
 			}
-			t.deltas[wid][i][j] = neuron.DActivate(neuron.Value) * sum
+			iD[j] = n.DActivate(n.Value) * sum
 		}
 	}
 
 	for i, l := range n.Layers {
-		for j := range l.Neurons {
-			for k := range l.Neurons[j].In {
-				t.partialDeltas[wid][i][j][k] += t.deltas[wid][i][j] * l.Neurons[j].In[k].In
+		iD := deltas[i]
+		iPD := partialDeltas[i]
+		for j, n := range l.Neurons {
+			jD := iD[j]
+			jPD := iPD[j]
+			for k, s := range n.In {
+				jPD[k] += jD * s.In
 			}
 		}
 	}
@@ -153,14 +168,16 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 func (t *BatchTrainer) update(n *deep.Neural, it int) {
 	var idx int
 	for i, l := range n.Layers {
-		for j := range l.Neurons {
-			for k := range l.Neurons[j].In {
-				update := t.solver.Update(l.Neurons[j].In[k].Weight,
-					t.accumulatedDeltas[i][j][k],
+		iAD := t.accumulatedDeltas[i]
+		for j, n := range l.Neurons {
+			jAD := iAD[j]
+			for k, s := range n.In {
+				update := t.solver.Update(s.Weight,
+					jAD[k],
 					it,
 					idx)
-				l.Neurons[j].In[k].Weight += update
-				t.accumulatedDeltas[i][j][k] = 0
+				s.Weight += update
+				jAD[k] = 0
 				idx++
 			}
 		}
