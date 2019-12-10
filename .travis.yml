@@ -2,10 +2,6 @@ language: go
 sudo: false
 before_install:
   - go get github.com/mattn/goveralls
-install:
-  - go get -v github.com/Masterminds/glide
-  - cd $GOPATH/src/github.com/Masterminds/glide && git checkout 3e13fd16ed5b0808ba0fb2e4bd98eb325ccde0a1 && go install && cd -
-  - glide install
 before_script:
   - go vet ./...
 script:
