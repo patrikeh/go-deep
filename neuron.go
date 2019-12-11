@@ -29,8 +29,9 @@ func (n *Neuron) fire() {
 	}
 	n.Value = n.Activate(sum)
 
+	nVal := n.Value
 	for _, s := range n.Out {
-		s.fire(n.Value)
+		s.fire(nVal)
 	}
 }
 
