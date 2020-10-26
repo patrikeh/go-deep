@@ -72,7 +72,7 @@ func toExample(in []string) training.Example {
 	if err != nil {
 		panic(err)
 	}
-	resEncoded := onehot(3, res)
+	encodedResponse := encodeResponse(3, res)
 	var features []float64
 	for i := 1; i < len(in); i++ {
 		res, err := strconv.ParseFloat(in[i], 64)
@@ -83,12 +83,12 @@ func toExample(in []string) training.Example {
 	}
 
 	return training.Example{
-		Response: resEncoded,
+		Response: encodedResponse,
 		Input:    features,
 	}
 }
 
-func onehot(classes int, val float64) []float64 {
+func encodeResponse(classes int, val float64) []float64 {
 	res := make([]float64, classes)
 	res[int(val)-1] = 1
 	return res
