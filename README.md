@@ -15,10 +15,6 @@ Feed forward/backpropagation neural network implementation. Currently supports:
 
 Networks are modeled as a set of neurons connected through synapses. No GPU computations - don't use this for any large scale applications.
 
-Todo:
-- Dropout
-- Batch normalization
-
 ## Install
 ```
 go get -u github.com/patrikeh/go-deep
