@@ -1,9 +1,9 @@
 # go-deep
-[![Go Report Card](https://goreportcard.com/badge/github.com/patrikeh/go-deep)](https://goreportcard.com/report/github.com/patrikeh/go-deep)
-[![Build Status](https://travis-ci.org/patrikeh/go-deep.svg?branch=master)](https://travis-ci.org/patrikeh/go-deep)
-[![Coverage Status](https://coveralls.io/repos/github/patrikeh/go-deep/badge.svg?branch=master)](https://coveralls.io/github/patrikeh/go-deep?branch=master)
-[![GoDoc](https://godoc.org/github.com/patrikeh/go-deep?status.svg)](https://godoc.org/github.com/patrikeh/go-deep)
 
+[![GoDoc](https://godoc.org/github.com/patrikeh/go-deep?status.svg)](https://godoc.org/github.com/patrikeh/go-deep)
+[![Go Report Card](https://goreportcard.com/badge/github.com/patrikeh/go-deep)](https://goreportcard.com/report/github.com/patrikeh/go-deep)
+[![CircleCI](https://circleci.com/gh/patrikeh/go-deep/tree/master.svg?style=svg)](https://circleci.com/gh/patrikeh/go-deep/tree/master)
+[![codecov](https://codecov.io/gh/patrikeh/go-deep/branch/master/graph/badge.svg?token=fFCrxfhuL0)](https://codecov.io/gh/patrikeh/go-deep)
 
 Feed forward/backpropagation neural network implementation. Currently supports:
 
@@ -15,16 +15,16 @@ Feed forward/backpropagation neural network implementation. Currently supports:
 
 Networks are modeled as a set of neurons connected through synapses. No GPU computations - don't use this for any large scale applications.
 
-Todo:
-- Dropout
-- Batch normalization
-
 ## Install
+
 ```
 go get -u github.com/patrikeh/go-deep
 ```
+
 ## Usage
+
 Import the go-deep package
+
 ```go
 import (
 	"fmt"
@@ -34,6 +34,7 @@ import (
 ```
 
 Define some data...
+
 ```go
 var data = training.Examples{
 	{[]float64{2.7810836, 2.550537003}, []float64{0}},
@@ -48,6 +49,7 @@ var data = training.Examples{
 ```
 
 Create a network with two hidden layers of size 2 and 2 respectively:
+
 ```go
 n := deep.NewNeural(&deep.Config{
 	/* Input dimensionality */
@@ -56,7 +58,7 @@ n := deep.NewNeural(&deep.Config{
 	Layout: []int{2, 2, 1},
 	/* Activation functions: Sigmoid, Tanh, ReLU, Linear */
 	Activation: deep.ActivationSigmoid,
-	/* Determines output layer activation & loss function: 
+	/* Determines output layer activation & loss function:
 	ModeRegression: linear outputs with MSE loss
 	ModeMultiClass: softmax output with Cross Entropy loss
 	ModeMultiLabel: sigmoid output with Cross Entropy loss
@@ -68,7 +70,9 @@ n := deep.NewNeural(&deep.Config{
 	Bias: true,
 })
 ```
+
 Train:
+
 ```go
 // params: learning rate, momentum, alpha decay, nesterov
 optimizer := training.NewSGD(0.05, 0.1, 1e-6, true)
@@ -78,23 +82,28 @@ trainer := training.NewTrainer(optimizer, 50)
 training, heldout := data.Split(0.5)
 trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ```
+
 resulting in:
+
 ```
-Epochs        Elapsed       Error         
----           ---           ---           
-5             12.938µs      0.36438       
-10            125.691µs     0.02261       
-15            177.194µs     0.00404       
-...     
-1000          10.703839ms   0.00000       
+Epochs        Elapsed       Error
+---           ---           ---
+5             12.938µs      0.36438
+10            125.691µs     0.02261
+15            177.194µs     0.00404
+...
+1000          10.703839ms   0.00000
 ```
+
 Finally, make some predictions:
+
 ```go
 fmt.Println(data[0].Input, "=>", n.Predict(data[0].Input))
 fmt.Println(data[5].Input, "=>", n.Predict(data[5].Input))
 ```
 
 Alternatively, batch training can be performed in parallell:
+
 ```go
 optimizer := NewAdam(0.001, 0.9, 0.999, 1e-8)
 // params: optimizer, verbosity (print info at every n:th iteration), batch-size, number of workers
@@ -105,11 +114,12 @@ trainer.Train(n, training, heldout, 1000) // training, validation, iterations
 ```
 
 ## Examples
-See ```training/trainer_test.go``` for a variety of toy examples of regression, multi-class classification, binary classification, etc.
 
-See ```examples/``` for more realistic examples:
+See `training/trainer_test.go` for a variety of toy examples of regression, multi-class classification, binary classification, etc.
+
+See `examples/` for more realistic examples:
 
 | Dataset | Topology | Epochs | Accuracy |
-| --- | --- | --- | --- |
-| wines | [5 5] | 10000 | ~98% |
-| mnist | [50] | 25 | ~97% |
+| ------- | -------- | ------ | -------- |
+| wines   | [5 5]    | 10000  | ~98%     |
+| mnist   | [50]     | 25     | ~97%     |

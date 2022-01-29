@@ -1,9 +1,0 @@
-language: go
-sudo: false
-before_install:
-  - go get github.com/mattn/goveralls
-before_script:
-  - go vet ./...
-script:
-  - go test -v ./...
-  - $GOPATH/bin/goveralls -ignore=examples/wines/wines.go,examples/mnist/mnist.go -service=travis-ci
