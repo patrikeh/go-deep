@@ -1,9 +1,9 @@
 # go-deep
 
+[![GoDoc](https://godoc.org/github.com/patrikeh/go-deep?status.svg)](https://godoc.org/github.com/patrikeh/go-deep)
 [![Go Report Card](https://goreportcard.com/badge/github.com/patrikeh/go-deep)](https://goreportcard.com/report/github.com/patrikeh/go-deep)
 [![CircleCI](https://circleci.com/gh/patrikeh/go-deep/tree/master.svg?style=svg)](https://circleci.com/gh/patrikeh/go-deep/tree/master)
 [![codecov](https://codecov.io/gh/patrikeh/go-deep/branch/master/graph/badge.svg?token=fFCrxfhuL0)](https://codecov.io/gh/patrikeh/go-deep)
-[![GoDoc](https://godoc.org/github.com/patrikeh/go-deep?status.svg)](https://godoc.org/github.com/patrikeh/go-deep)
 
 Feed forward/backpropagation neural network implementation. Currently supports:
 
