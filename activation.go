@@ -148,7 +148,7 @@ func (a LeakyReLU) Df(y float64, eps ...float64) (float64, error) {
 	}
 	
 	if y > 0 {
-		return 1
+		return 1, nil
 	}
 	return epsilon, nil
 }
