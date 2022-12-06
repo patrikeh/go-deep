@@ -102,6 +102,21 @@ type ReLU struct{}
 // F is ReLU(x)
 func (a ReLU) F(x float64) float64 { return math.Max(x, 0) }
 
+// LeakyReLU is a leaky rectified linear unit activator, where you have a small slope instead of zero. 
+type LeakyRelu struct{}
+
+// F is LeakyReLU(x, eps)
+func (a LeakyRelu) F(x float64, eps ...float64) float64 {
+	epsilon := 0.3 
+	if len(eps) > 0 {
+		epsilon = eps[0]
+	}
+
+	return math.Max(epsilon*x, x)
+}
+
+
+
 // Df is ReLU'(y), where y = ReLU(x)
 func (a ReLU) Df(y float64) float64 {
 	if y > 0 {
