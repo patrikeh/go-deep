@@ -70,6 +70,7 @@ const (
 	// ActivationSoftmax is a softmax activation (per layer)
 	ActivationSoftmax ActivationType = 5
 	// ActivationLeakyReLU is a leaky ReLU activation
+	ActivationLeakyReLU ActivationType = 6
 )
 
 // Differentiable is an activation function and its first order derivative,
