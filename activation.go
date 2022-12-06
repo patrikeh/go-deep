@@ -113,17 +113,17 @@ func (a ReLU) F(x float64) float64 { return math.Max(x, 0) }
 type LeakyRelu struct{}
 
 // F is LeakyReLU(x, eps)
-func (a LeakyRelu) F(x float64, eps ...float64) float64 {
+func (a LeakyRelu) F(x float64, eps ...float64) (float64, error) {
 	epsilon := 0.3 
 	if len(eps) > 0 {
 		// If the parameter is negative, return an error with a message.
 		if eps[0] < 0 {
-			return nil, errors.New("Invalid value, LeakyReLU needs a positive slope.")
+			return 0, errors.New("Invalid value, LeakyReLU needs a positive slope.")
 		}
 		epsilon = eps[0]
 	}
 
-	return math.Max(epsilon*x, x)
+	return math.Max(epsilon*x, x), nil
 }
 
 
@@ -137,12 +137,12 @@ func (a ReLU) Df(y float64) float64 {
 }
 
 // Df is LeakyReLU'(y), where y = LeakyReLU(x, eps)
-func (a LeakyReLU) Df(y float64, eps ...float64) float64 {
+func (a LeakyReLU) Df(y float64, eps ...float64) (float64, error) {
 	epsilon := 0.3
 	if len(eps) > 0 {
 		// If the parameter is negative, return an error with a message.
 		if eps[0] < 0 {
-			return nil, errors.New("Invalid value, LeakyReLU needs a positive slope.")
+			return 0, errors.New("Invalid value, LeakyReLU needs a positive slope.")
 		}
 		epsilon = eps[0]
 	}
@@ -150,7 +150,7 @@ func (a LeakyReLU) Df(y float64, eps ...float64) float64 {
 	if y > 0 {
 		return 1
 	}
-	return epsilon
+	return epsilon, nil
 }
 
 // Linear is a linear activator
