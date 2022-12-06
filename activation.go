@@ -44,7 +44,7 @@ func GetActivation(act ActivationType) Differentiable {
 	case ActivationReLU:
 		return ReLU{}
 	case ActivationLeakyReLU:
-		return LeakyRelu{}
+		return LeakyReLU{}
 	case ActivationLinear:
 		return Linear{}
 	case ActivationSoftmax:
@@ -110,10 +110,10 @@ type ReLU struct{}
 func (a ReLU) F(x float64) float64 { return math.Max(x, 0) }
 
 // LeakyReLU is a leaky rectified linear unit activator, where you have a small slope instead of zero. 
-type LeakyRelu struct{}
+type LeakyReLU struct{}
 
 // F is LeakyReLU(x, eps)
-func (a LeakyRelu) F(x float64, eps ...float64) (float64, error) {
+func (a LeakyReLU) F(x float64, eps ...float64) (float64, error) {
 	epsilon := 0.3 
 	if len(eps) > 0 {
 		// If the parameter is negative, return an error with a message.
