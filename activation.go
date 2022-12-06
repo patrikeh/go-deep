@@ -151,6 +151,7 @@ func (a LeakyReLU) Df(y float64, eps ...float64) float64 {
 		return 1
 	}
 	return epsilon
+}
 
 // Linear is a linear activator
 type Linear struct{}
