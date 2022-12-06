@@ -1,6 +1,9 @@
 package deep
 
-import "math"
+import (
+	"math"
+	"errors"
+)
 
 // Mode denotes inference mode
 type Mode int
@@ -40,6 +43,8 @@ func GetActivation(act ActivationType) Differentiable {
 		return Tanh{}
 	case ActivationReLU:
 		return ReLU{}
+	case ActivationLeakyReLU:
+		return LeakyRelu{}
 	case ActivationLinear:
 		return Linear{}
 	case ActivationSoftmax:
@@ -64,6 +69,7 @@ const (
 	ActivationLinear ActivationType = 4
 	// ActivationSoftmax is a softmax activation (per layer)
 	ActivationSoftmax ActivationType = 5
+	// ActivationLeakyReLU is a leaky ReLU activation
 )
 
 // Differentiable is an activation function and its first order derivative,
@@ -109,6 +115,10 @@ type LeakyRelu struct{}
 func (a LeakyRelu) F(x float64, eps ...float64) float64 {
 	epsilon := 0.3 
 	if len(eps) > 0 {
+		// If the parameter is negative, return an error with a message.
+		if eps[0] < 0 {
+			return nil, errors.New("Invalid value, LeakyReLU needs a positive slope.")
+		}
 		epsilon = eps[0]
 	}
 
@@ -124,6 +134,22 @@ func (a ReLU) Df(y float64) float64 {
 	}
 	return 0
 }
+
+// Df is LeakyReLU'(y), where y = LeakyReLU(x, eps)
+func (a LeakyReLU) Df(y float64, eps ...float64) float64 {
+	epsilon := 0.3
+	if len(eps) > 0 {
+		// If the parameter is negative, return an error with a message.
+		if eps[0] < 0 {
+			return nil, errors.New("Invalid value, LeakyReLU needs a positive slope.")
+		}
+		epsilon = eps[0]
+	}
+	
+	if y > 0 {
+		return 1
+	}
+	return epsilon
 
 // Linear is a linear activator
 type Linear struct{}
