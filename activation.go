@@ -1,6 +1,9 @@
 package deep
 
-import "math"
+import (
+	"math"
+	"errors"
+)
 
 // Mode denotes inference mode
 type Mode int
@@ -40,6 +43,8 @@ func GetActivation(act ActivationType) Differentiable {
 		return Tanh{}
 	case ActivationReLU:
 		return ReLU{}
+	case ActivationLeakyReLU:
+		return LeakyReLU{}
 	case ActivationLinear:
 		return Linear{}
 	case ActivationSoftmax:
@@ -64,6 +69,8 @@ const (
 	ActivationLinear ActivationType = 4
 	// ActivationSoftmax is a softmax activation (per layer)
 	ActivationSoftmax ActivationType = 5
+	// ActivationLeakyReLU is a leaky ReLU activation
+	ActivationLeakyReLU ActivationType = 6
 )
 
 // Differentiable is an activation function and its first order derivative,
@@ -102,12 +109,48 @@ type ReLU struct{}
 // F is ReLU(x)
 func (a ReLU) F(x float64) float64 { return math.Max(x, 0) }
 
+// LeakyReLU is a leaky rectified linear unit activator, where you have a small slope instead of zero. 
+type LeakyReLU struct{}
+
+// F is LeakyReLU(x, eps)
+func (a LeakyReLU) F(x float64, eps ...float64) (float64, error) {
+	epsilon := 0.3 
+	if len(eps) > 0 {
+		// If the parameter is negative, return an error with a message.
+		if eps[0] < 0 {
+			return 0, errors.New("Invalid value, LeakyReLU needs a positive slope.")
+		}
+		epsilon = eps[0]
+	}
+
+	return math.Max(epsilon*x, x), nil
+}
+
+
+
 // Df is ReLU'(y), where y = ReLU(x)
 func (a ReLU) Df(y float64) float64 {
 	if y > 0 {
 		return 1
 	}
 	return 0
+}
+
+// Df is LeakyReLU'(y), where y = LeakyReLU(x, eps)
+func (a LeakyReLU) Df(y float64, eps ...float64) (float64, error) {
+	epsilon := 0.3
+	if len(eps) > 0 {
+		// If the parameter is negative, return an error with a message.
+		if eps[0] < 0 {
+			return 0, errors.New("Invalid value, LeakyReLU needs a positive slope.")
+		}
+		epsilon = eps[0]
+	}
+	
+	if y > 0 {
+		return 1, nil
+	}
+	return epsilon, nil
 }
 
 // Linear is a linear activator
