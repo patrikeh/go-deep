@@ -1,6 +1,9 @@
 package training
 
-import "math/rand"
+import (
+	"math/rand"
+	"sync"
+)
 
 // Example is an input-target pair
 type Example struct {
@@ -8,14 +11,18 @@ type Example struct {
 	Response []float64
 }
 
+var mu sync.Mutex
+
 // Examples is a set of input-output pairs
 type Examples []Example
 
 // Shuffle shuffles slice in-place
 func (e Examples) Shuffle() {
 	for i := range e {
+		mu.Lock()
 		j := rand.Intn(i + 1)
 		e[i], e[j] = e[j], e[i]
+		mu.Unlock()
 	}
 }
 
