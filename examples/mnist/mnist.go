@@ -22,7 +22,7 @@ import (
 	https://pjreddie.com/projects/mnist-in-csv/
 */
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	train, err := load("./mnist_train.data")
 	if err != nil {
@@ -43,24 +43,29 @@ func main() {
 			test[i].Input[j] = test[i].Input[j] / 255
 		}
 	}
-	test.Shuffle()
-	train.Shuffle()
+	test.Shuffle(random)
+	train.Shuffle(random)
 
-	neural := deep.NewNeural(&deep.Config{
+	neural, err := deep.NewNeural(&deep.Config{
 		Inputs:     len(train[0].Input),
 		Layout:     []int{50, 10},
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMultiClass,
-		Weight:     deep.NewNormal(0.6, 0.1), // slight positive bias helps ReLU
+		Weight:     deep.NewNormal(random, 0.6, 0.1), // slight positive bias helps ReLU
 		Bias:       true,
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	//trainer := training.NewTrainer(training.NewSGD(0.01, 0.5, 1e-6, true), 1)
-	trainer := training.NewBatchTrainer(training.NewAdam(0.02, 0.9, 0.999, 1e-8), 1, 200, 8)
+	trainer := training.NewBatchTrainer(training.NewAdam(0.02, 0.9, 0.999, 1e-8), 1, 200, 8, random)
 
 	fmt.Printf("training: %d, val: %d, test: %d\n", len(train), len(test), len(test))
 
-	trainer.Train(neural, train, test, 500)
+	if err := trainer.Train(neural, train, test, 500); err != nil {
+		panic(err)
+	}
 }
 
 func load(path string) (training.Examples, error) {

@@ -16,7 +16,7 @@ import (
 
 func main() {
 
-	rand.Seed(time.Now().UnixNano())
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	data, err := load("./wine.data")
 	if err != nil {
@@ -26,25 +26,30 @@ func main() {
 	for i := range data {
 		deep.Standardize(data[i].Input)
 	}
-	data.Shuffle()
+	data.Shuffle(random)
 
 	fmt.Printf("have %d entries\n", len(data))
 
-	neural := deep.NewNeural(&deep.Config{
+	neural, err := deep.NewNeural(&deep.Config{
 		Inputs:     len(data[0].Input),
 		Layout:     []int{8, 3},
 		Activation: deep.ActivationTanh,
 		Mode:       deep.ModeMultiClass,
-		Weight:     deep.NewNormal(1, 0),
+		Weight:     deep.NewNormal(random, 1, 0),
 		Bias:       true,
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	//trainer := training.NewTrainer(training.NewSGD(0.005, 0.5, 1e-6, true), 50)
 	//trainer := training.NewBatchTrainer(training.NewSGD(0.005, 0.1, 0, true), 50, 300, 16)
 	//trainer := training.NewTrainer(training.NewAdam(0.1, 0, 0, 0), 50)
-	trainer := training.NewBatchTrainer(training.NewAdam(0.1, 0, 0, 0), 50, len(data)/2, 12)
+	trainer := training.NewBatchTrainer(training.NewAdam(0.1, 0, 0, 0), 50, len(data)/2, 12, random)
 	//data, heldout := data.Split(0.5)
-	trainer.Train(neural, data, data, 5000)
+	if err := trainer.Train(neural, data, data, 5000); err != nil {
+		panic(err)
+	}
 }
 
 func load(path string) (training.Examples, error) {

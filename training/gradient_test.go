@@ -40,7 +40,6 @@ func Test_Gradients(t *testing.T) {
 		{"tanh", deep.ActivationTanh},
 		{"relu", deep.ActivationReLU},
 		{"linear", deep.ActivationLinear},
-		{"softmax", deep.ActivationSoftmax},
 	}
 	// Three outputs matter: with two, many wrong softmax Jacobians look right by symmetry.
 	shapes := []struct {
@@ -58,6 +57,9 @@ func Test_Gradients(t *testing.T) {
 	for _, m := range modes {
 		for _, a := range activations {
 			for _, s := range shapes {
+				if m.mode == deep.ModeMultiClass && len(s.ideal) < 2 {
+					continue // softmax needs at least two outputs
+				}
 				config := &deep.Config{
 					Inputs:     3,
 					Layout:     s.layout,
@@ -69,9 +71,19 @@ func Test_Gradients(t *testing.T) {
 				}
 				example := Example{Input: []float64{0.3, 0.2, 0.7}, Response: s.ideal}
 				t.Run(fmt.Sprintf("%s/%s/%v", m.name, a.name, s.layout), func(t *testing.T) {
-					assertGradients(t, deep.NewNeural(config), example)
+					assertGradients(t, newNeural(t, config), example)
 				})
 			}
+		}
+	}
+
+	// Without a mode, softmax is allowed as the activation of a network with only an output layer.
+	for _, loss := range []deep.LossType{deep.LossNone, deep.LossCrossEntropy} {
+		for _, s := range shapes[1:2] {
+			config := &deep.Config{Inputs: 3, Layout: s.layout, Activation: deep.ActivationSoftmax, Loss: loss, Bias: true, Weight: distinctWeights()}
+			t.Run(fmt.Sprintf("default-softmax/%s/%v", loss, s.layout), func(t *testing.T) {
+				assertGradients(t, newNeural(t, config), Example{Input: []float64{0.3, 0.2, 0.7}, Response: s.ideal})
+			})
 		}
 	}
 }
@@ -114,7 +126,7 @@ func assertGradients(t *testing.T, n *deep.Neural, e Example) {
 	for i, layer := range n.Layers {
 		for j, neuron := range layer.Neurons {
 			for k, synapse := range neuron.In {
-				slope := measureSlope(n, synapse, e)
+				slope := measureSlope(t, n, synapse, e)
 				// Absolute, because a relative error is undefined for a zero gradient.
 				if !assert.InDelta(t, slope, gradients[i][j][k], gradientTolerance, "online trainer, weight [%d][%d][%d]", i, j, k) ||
 					!assert.InDelta(t, slope, scale*batch.partialDeltas[0][i][j][k], gradientTolerance, "batch trainer, weight [%d][%d][%d]", i, j, k) {
@@ -126,13 +138,13 @@ func assertGradients(t *testing.T, n *deep.Neural, e Example) {
 }
 
 // measureSlope estimates ∂loss/∂weight by nudging the weight in both directions.
-func measureSlope(n *deep.Neural, synapse *deep.Synapse, e Example) float64 {
+func measureSlope(t *testing.T, n *deep.Neural, synapse *deep.Synapse, e Example) float64 {
 	weight := synapse.Weight
 	defer func() { synapse.Weight = weight }()
 
 	lossAt := func(w float64) float64 {
 		synapse.Weight = w
-		return deep.GetLoss(n.Config.Loss).F([][]float64{n.Predict(e.Input)}, [][]float64{e.Response})
+		return deep.GetLoss(n.Config.Loss).F([][]float64{predict(t, n, e.Input)}, [][]float64{e.Response})
 	}
 	return (lossAt(weight+gradientStep) - lossAt(weight-gradientStep)) / (2 * gradientStep)
 }
