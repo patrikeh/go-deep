@@ -6,7 +6,7 @@ jobs:
   build:
     executor:
       name: go/default
-      tag: "1.17"
+      tag: "1.26"
     steps:
       - checkout
       - go/load-cache
