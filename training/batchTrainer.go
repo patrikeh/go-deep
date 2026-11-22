@@ -1,6 +1,7 @@
 package training
 
 import (
+	"slices"
 	"sync"
 	"time"
 
@@ -21,7 +22,6 @@ type internalb struct {
 	deltas            [][][]float64
 	partialDeltas     [][][][]float64
 	accumulatedDeltas [][][]float64
-	moments           [][][]float64
 }
 
 func newBatchTraining(layers []*deep.Layer, parallelism int) *internalb {
@@ -64,24 +64,11 @@ func NewBatchTrainer(solver Solver, verbosity, batchSize, parallelism int) *Batc
 func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iterations int) {
 	t.internalb = newBatchTraining(n.Layers, t.parallelism)
 
-	train := make(Examples, len(examples))
-	copy(train, examples)
+	train := slices.Clone(examples)
 
-	workCh := make(chan Example, t.parallelism)
 	nets := make([]*deep.Neural, t.parallelism)
-
-	wg := sync.WaitGroup{}
-	for i := 0; i < t.parallelism; i++ {
+	for i := range nets {
 		nets[i] = deep.NewNeural(n.Config)
-
-		go func(id int, workCh <-chan Example) {
-			n := nets[id]
-			for e := range workCh {
-				n.Forward(e.Input)
-				t.calculateDeltas(n, e.Response, id)
-				wg.Done()
-			}
-		}(i, workCh)
 	}
 
 	t.printer.Init(n)
@@ -98,11 +85,7 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 				n.ApplyWeights(currentWeights)
 			}
 
-			wg.Add(len(b))
-			for _, item := range b {
-				workCh <- item
-			}
-			wg.Wait()
+			t.calculateBatch(nets, b)
 
 			for _, wPD := range t.partialDeltas {
 				for i, iPD := range wPD {
@@ -117,13 +100,28 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 				}
 			}
 
-			t.update(n, it)
+			t.update(n, it, len(b))
 		}
 
 		if t.verbosity > 0 && it%t.verbosity == 0 && len(validation) > 0 {
 			t.printer.PrintProgress(n, validation, time.Since(ts), it)
 		}
 	}
+}
+
+// calculateBatch deals the batch out round robin, so that the result doesn't depend on scheduling.
+func (t *BatchTrainer) calculateBatch(nets []*deep.Neural, batch Examples) {
+	workers := min(len(nets), len(batch))
+	var wg sync.WaitGroup
+	for id := range workers {
+		wg.Go(func() {
+			for i := id; i < len(batch); i += workers {
+				nets[id].Forward(batch[i].Input)
+				t.calculateDeltas(nets[id], batch[i].Response, id)
+			}
+		})
+	}
+	wg.Wait()
 }
 
 func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int) {
@@ -158,7 +156,7 @@ func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int)
 	}
 }
 
-func (t *BatchTrainer) update(n *deep.Neural, it int) {
+func (t *BatchTrainer) update(n *deep.Neural, it, batchSize int) {
 	var idx int
 	for i, l := range n.Layers {
 		iAD := t.accumulatedDeltas[i]
@@ -166,7 +164,7 @@ func (t *BatchTrainer) update(n *deep.Neural, it int) {
 			jAD := iAD[j]
 			for k, s := range n.In {
 				update := t.solver.Update(s.Weight,
-					jAD[k],
+					jAD[k]/float64(batchSize),
 					it,
 					idx)
 				s.Weight += update

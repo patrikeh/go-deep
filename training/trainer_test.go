@@ -1,7 +1,6 @@
 package training
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"testing"
@@ -48,24 +47,24 @@ func Test_RegressionLinearOuts(t *testing.T) {
 	rand.Seed(0)
 	squares := Examples{}
 	for i := 0.0; i < 100.0; i++ {
-		squares = append(squares, Example{Input: []float64{i}, Response: []float64{math.Sqrt(i)}})
+		squares = append(squares, Example{Input: []float64{i / 100}, Response: []float64{math.Sqrt(i)}})
 	}
 	squares.Shuffle()
 	n := deep.NewNeural(&deep.Config{
 		Inputs:     1,
-		Layout:     []int{3, 3, 1},
-		Activation: deep.ActivationReLU,
+		Layout:     []int{8, 8, 1}, // converges from ~99% of seeds
+		Activation: deep.ActivationTanh,
 		Mode:       deep.ModeRegression,
 		Weight:     deep.NewNormal(0.5, 0.5),
 		Bias:       true,
 	})
 
 	trainer := NewBatchTrainer(NewAdam(0.01, 0, 0, 0), 0, 25, 2)
-	trainer.Train(n, squares, nil, 25000)
+	trainer.Train(n, squares, nil, 3000)
 
 	for i := 0; i < 100; i++ {
 		x := float64(rand.Intn(99) + 1)
-		assert.InEpsilon(t, math.Sqrt(x)+1, n.Predict([]float64{x})[0]+1, 0.1)
+		assert.InEpsilon(t, math.Sqrt(x)+1, n.Predict([]float64{x / 100})[0]+1, 0.1)
 	}
 }
 
@@ -130,6 +129,7 @@ func Test_Prediction(t *testing.T) {
 }
 
 func Test_CrossVal(t *testing.T) {
+	rand.Seed(0)
 	n := deep.NewNeural(&deep.Config{
 		Inputs:     2,
 		Layout:     []int{1, 1},
@@ -149,6 +149,7 @@ func Test_CrossVal(t *testing.T) {
 }
 
 func Test_MultiClass(t *testing.T) {
+	rand.Seed(0)
 	var data = []Example{
 		{[]float64{2.7810836, 2.550537003}, []float64{1, 0}},
 		{[]float64{1.465489372, 2.362125076}, []float64{1, 0}},
@@ -164,7 +165,7 @@ func Test_MultiClass(t *testing.T) {
 
 	n := deep.NewNeural(&deep.Config{
 		Inputs:     2,
-		Layout:     []int{2, 2},
+		Layout:     []int{8, 2}, // two hidden ReLUs die from one seed in four
 		Activation: deep.ActivationReLU,
 		Mode:       deep.ModeMultiClass,
 		Loss:       deep.LossMeanSquared,
@@ -218,10 +219,10 @@ func Test_xor(t *testing.T) {
 	rand.Seed(0)
 	n := deep.NewNeural(&deep.Config{
 		Inputs:     2,
-		Layout:     []int{3, 1}, // Sufficient for modeling (AND+OR) - with 5-6 neuron always converges
+		Layout:     []int{6, 1}, // 2 are sufficient for modeling (AND+OR), 6 converge from any seed
 		Activation: deep.ActivationSigmoid,
 		Mode:       deep.ModeBinary,
-		Weight:     deep.NewUniform(.25, 0),
+		Weight:     deep.NewNormal(1, 0),
 		Bias:       true,
 	})
 	permutations := Examples{
@@ -232,13 +233,9 @@ func Test_xor(t *testing.T) {
 	}
 
 	trainer := NewTrainer(NewSGD(1.0, 0.1, 1e-6, false), 50)
-	trainer.Train(n, permutations, permutations, 500)
+	trainer.Train(n, permutations, permutations, 1000)
 
 	for _, perm := range permutations {
 		assert.InEpsilon(t, n.Predict(perm.Input)[0]+1, perm.Response[0]+1, 0.2)
 	}
-}
-
-func printResult(ideal, actual []float64) {
-	fmt.Printf("want: %+v have: %+v\n", ideal, actual)
 }

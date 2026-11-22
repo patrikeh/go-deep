@@ -1,6 +1,7 @@
 package training
 
 import (
+	"slices"
 	"time"
 
 	deep "github.com/patrikeh/go-deep"
@@ -49,11 +50,13 @@ func (t *OnlineTrainer) Train(n *deep.Neural, examples, validation Examples, ite
 	t.printer.Init(n)
 	t.solver.Init(n.NumWeights())
 
+	train := slices.Clone(examples)
+
 	ts := time.Now()
 	for i := 1; i <= iterations; i++ {
-		examples.Shuffle()
-		for j := 0; j < len(examples); j++ {
-			t.learn(n, examples[j], i)
+		train.Shuffle()
+		for _, e := range train {
+			t.learn(n, e, i)
 		}
 		if t.verbosity > 0 && i%t.verbosity == 0 && len(validation) > 0 {
 			t.printer.PrintProgress(n, validation, time.Since(ts), i)

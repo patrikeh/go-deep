@@ -91,10 +91,10 @@ func Logistic(x, a float64) float64 {
 type Tanh struct{}
 
 // F is Tanh(x)
-func (a Tanh) F(x float64) float64 { return (1 - math.Exp(-2*x)) / (1 + math.Exp(-2*x)) }
+func (a Tanh) F(x float64) float64 { return math.Tanh(x) }
 
 // Df is Tanh'(y), where y = Tanh(x)
-func (a Tanh) Df(y float64) float64 { return 1 - math.Pow(y, 2) }
+func (a Tanh) Df(y float64) float64 { return 1 - y*y }
 
 // ReLU is a rectified linear unit activator
 type ReLU struct{}

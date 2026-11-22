@@ -20,7 +20,7 @@ func Variance(xx []float64) float64 {
 
 	var variance float64
 	for _, x := range xx {
-		variance += math.Pow((x - m), 2)
+		variance += (x - m) * (x - m)
 	}
 
 	return variance / float64(len(xx)-1)
@@ -45,11 +45,15 @@ func Standardize(xx []float64) {
 	}
 }
 
-// Normalize scales to (0,1)
+// Normalize scales to [0,1], and constant input to 0
 func Normalize(xx []float64) {
-	min, max := Min(xx), Max(xx)
+	lowest, highest := Min(xx), Max(xx)
+	width := highest - lowest
+	if width == 0 {
+		width = 1
+	}
 	for i, x := range xx {
-		xx[i] = (x - min) / (max - min)
+		xx[i] = (x - lowest) / width
 	}
 }
 
@@ -120,9 +124,9 @@ func Softmax(xx []float64) []float64 {
 	return out
 }
 
-// Round to nearest integer
+// Round to nearest integer, with halves away from zero
 func Round(x float64) float64 {
-	return math.Floor(x + .5)
+	return math.Round(x)
 }
 
 // Dot product
