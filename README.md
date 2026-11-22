@@ -61,7 +61,7 @@ n := deep.NewNeural(&deep.Config{
 	/* Determines output layer activation & loss function:
 	ModeRegression: linear outputs with MSE loss
 	ModeMultiClass: softmax output with Cross Entropy loss
-	ModeMultiLabel: sigmoid output with Cross Entropy loss
+	ModeMultiLabel: sigmoid output with binary CE loss
 	ModeBinary: sigmoid output with binary CE loss */
 	Mode: deep.ModeBinary,
 	/* Weight initializers: {deep.NewNormal(μ, σ), deep.NewUniform(μ, σ)} */

@@ -127,17 +127,10 @@ func (t *BatchTrainer) Train(n *deep.Neural, examples, validation Examples, iter
 }
 
 func (t *BatchTrainer) calculateDeltas(n *deep.Neural, ideal []float64, wid int) {
-	loss := deep.GetLoss(n.Config.Loss)
 	deltas := t.deltas[wid]
 	partialDeltas := t.partialDeltas[wid]
-	lastDeltas := deltas[len(n.Layers)-1]
-
-	for i, n := range n.Layers[len(n.Layers)-1].Neurons {
-		lastDeltas[i] = loss.Df(
-			n.Value,
-			ideal[i],
-			n.DActivate(n.Value))
-	}
+	last := len(n.Layers) - 1
+	outputDeltas(n.Layers[last], n.Config.Loss, ideal, deltas[last])
 
 	for i := len(n.Layers) - 2; i >= 0; i-- {
 		l := n.Layers[i]

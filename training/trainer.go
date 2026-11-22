@@ -68,12 +68,8 @@ func (t *OnlineTrainer) learn(n *deep.Neural, e Example, it int) {
 }
 
 func (t *OnlineTrainer) calculateDeltas(n *deep.Neural, ideal []float64) {
-	for i, neuron := range n.Layers[len(n.Layers)-1].Neurons {
-		t.deltas[len(n.Layers)-1][i] = deep.GetLoss(n.Config.Loss).Df(
-			neuron.Value,
-			ideal[i],
-			neuron.DActivate(neuron.Value))
-	}
+	last := len(n.Layers) - 1
+	outputDeltas(n.Layers[last], n.Config.Loss, ideal, t.deltas[last])
 
 	for i := len(n.Layers) - 2; i >= 0; i-- {
 		for j, neuron := range n.Layers[i].Neurons {
