@@ -22,9 +22,9 @@ func Test_Loss(t *testing.T) {
 		},
 		{
 			loss:   LossCrossEntropy,
-			input:  [][]float64{{0.5, 1.0, 1.5}},
-			target: [][]float64{{0.0, 1.0, 1.0}},
-			res:    -0.4,
+			input:  [][]float64{{0.2, 0.3, 0.5}},
+			target: [][]float64{{0.0, 0.0, 1.0}},
+			res:    0.693,
 		},
 		{
 			loss:   LossBinaryCrossEntropy,
@@ -39,4 +39,8 @@ func Test_Loss(t *testing.T) {
 		assert.InEpsilon(t, test.res, estimate, 1e-1, fmt.Sprintf("%s estimate: %.2f expected: %.2f", test.loss.String(), estimate, test.res))
 		assert.NotEqual(t, "N/A", test.loss.String())
 	}
+}
+
+func Test_CrossEntropyPerfectPrediction(t *testing.T) {
+	assert.InDelta(t, 0, CrossEntropy{}.F([][]float64{Softmax([]float64{800, 0})}, [][]float64{{1, 0}}), 1e-12)
 }

@@ -49,6 +49,9 @@ type Loss interface {
 	Df(estimate, ideal, activation float64) float64
 }
 
+// logEpsilon keeps log(0) out of the cross entropy losses
+const logEpsilon = 1e-16
+
 // CrossEntropy is CE loss
 type CrossEntropy struct{}
 
@@ -59,7 +62,7 @@ func (l CrossEntropy) F(estimate, ideal [][]float64) float64 {
 	for i := range estimate {
 		ce := 0.0
 		for j := range estimate[i] {
-			ce += ideal[i][j] * math.Log(estimate[i][j])
+			ce += ideal[i][j] * math.Log(estimate[i][j]+logEpsilon)
 		}
 
 		sum -= ce
@@ -77,12 +80,11 @@ type BinaryCrossEntropy struct{}
 
 // F is CE(...)
 func (l BinaryCrossEntropy) F(estimate, ideal [][]float64) float64 {
-	epsilon := 1e-16
 	var sum float64
 	for i := range estimate {
 		ce := 0.0
 		for j := range estimate[i] {
-			ce += ideal[i][j]*math.Log(estimate[i][j]+epsilon) + (1.0-ideal[i][j])*math.Log(1.0-estimate[i][j]+epsilon)
+			ce += ideal[i][j]*math.Log(estimate[i][j]+logEpsilon) + (1.0-ideal[i][j])*math.Log(1.0-estimate[i][j]+logEpsilon)
 		}
 		sum -= ce
 	}
@@ -102,7 +104,8 @@ func (l MeanSquared) F(estimate, ideal [][]float64) float64 {
 	var sum float64
 	for i := 0; i < len(estimate); i++ {
 		for j := 0; j < len(estimate[i]); j++ {
-			sum += math.Pow(estimate[i][j]-ideal[i][j], 2)
+			diff := estimate[i][j] - ideal[i][j]
+			sum += diff * diff
 		}
 	}
 	return sum / float64(len(estimate)*len(estimate[0]))

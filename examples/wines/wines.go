@@ -1,95 +1,71 @@
+// Command wines classifies wines by cultivar, from the UCI wine dataset.
 package main
 
 import (
-	"bufio"
-	"encoding/csv"
 	"fmt"
-	"io"
 	"math/rand"
 	"os"
-	"strconv"
 	"time"
 
-	"github.com/patrikeh/go-deep"
+	deep "github.com/patrikeh/go-deep"
+	"github.com/patrikeh/go-deep/examples/internal/dataset"
 	"github.com/patrikeh/go-deep/training"
 )
 
+const (
+	dataPath        = "./wine.data"
+	classes         = 3
+	firstLabel      = 1
+	trainShare      = 0.75
+	epochs          = 1000
+	reportEvery     = 100
+	batchSize       = 32
+	parallelism     = 4
+	adamLearnRate   = 0.01
+	hiddenNeurons   = 8
+	weightDeviation = 1
+)
+
 func main() {
+	if err := run(time.Now().UnixNano()); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
 
-	rand.Seed(time.Now().UnixNano())
+func run(seed int64) error {
+	random := rand.New(rand.NewSource(seed))
 
-	data, err := load("./wine.data")
+	data, err := dataset.LoadCSV(dataPath, classes, firstLabel)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	data.Shuffle(random)
+	train, test := data.Split(trainShare, random)
+	dataset.Standardize(train, test)
+	fmt.Printf("training on %d wines, testing on %d\n", len(train), len(test))
 
-	for i := range data {
-		deep.Standardize(data[i].Input)
-	}
-	data.Shuffle()
-
-	fmt.Printf("have %d entries\n", len(data))
-
-	neural := deep.NewNeural(&deep.Config{
-		Inputs:     len(data[0].Input),
-		Layout:     []int{8, 3},
+	neural, err := deep.NewNeural(&deep.Config{
+		Inputs:     len(train[0].Input),
+		Layout:     []int{hiddenNeurons, classes},
 		Activation: deep.ActivationTanh,
 		Mode:       deep.ModeMultiClass,
-		Weight:     deep.NewNormal(1, 0),
+		Weight:     deep.NewNormal(random, weightDeviation, 0),
 		Bias:       true,
 	})
-
-	//trainer := training.NewTrainer(training.NewSGD(0.005, 0.5, 1e-6, true), 50)
-	//trainer := training.NewBatchTrainer(training.NewSGD(0.005, 0.1, 0, true), 50, 300, 16)
-	//trainer := training.NewTrainer(training.NewAdam(0.1, 0, 0, 0), 50)
-	trainer := training.NewBatchTrainer(training.NewAdam(0.1, 0, 0, 0), 50, len(data)/2, 12)
-	//data, heldout := data.Split(0.5)
-	trainer.Train(neural, data, data, 5000)
-}
-
-func load(path string) (training.Examples, error) {
-	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	r := csv.NewReader(bufio.NewReader(f))
-
-	var examples training.Examples
-	for {
-		record, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		examples = append(examples, toExample(record))
+		return err
 	}
 
-	return examples, nil
-}
+	trainer := training.NewBatchTrainer(training.NewAdam(adamLearnRate, 0, 0, 0), reportEvery, batchSize, parallelism, random)
+	if err := trainer.Train(neural, train, train, epochs); err != nil {
+		return err
+	}
 
-func toExample(in []string) training.Example {
-	res, err := strconv.ParseFloat(in[0], 64)
+	accuracy, err := dataset.Accuracy(neural, test)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	resEncoded := onehot(3, res)
-	var features []float64
-	for i := 1; i < len(in); i++ {
-		res, err := strconv.ParseFloat(in[i], 64)
-		if err != nil {
-			panic(err)
-		}
-		features = append(features, res)
-	}
-
-	return training.Example{
-		Response: resEncoded,
-		Input:    features,
-	}
-}
-
-func onehot(classes int, val float64) []float64 {
-	res := make([]float64, classes)
-	res[int(val)-1] = 1
-	return res
+	fmt.Printf("accuracy on unseen wines: %.1f%%\n", 100*accuracy)
+	return nil
 }

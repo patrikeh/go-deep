@@ -65,3 +65,15 @@ func Test_Sgn(t *testing.T) {
 	assert.Equal(t, Sgn(-5), -1.)
 	assert.Equal(t, Sgn(3), 1.)
 }
+
+func Test_NormalizeConstant(t *testing.T) {
+	s := []float64{3, 3, 3}
+	Normalize(s)
+	assert.Equal(t, []float64{0, 0, 0}, s)
+}
+
+func Test_Round(t *testing.T) {
+	for x, want := range map[float64]float64{2.5: 3, -2.5: -3, 0.49999999999999994: 0, -0.4: 0} {
+		assert.InDelta(t, want, Round(x), 0, "Round(%v)", x)
+	}
+}

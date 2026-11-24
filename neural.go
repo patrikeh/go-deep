@@ -1,75 +1,55 @@
 package deep
 
 import (
+	"errors"
 	"fmt"
+	"slices"
+	"sync"
 )
 
-// Neural is a neural network
+var (
+	// ErrInvalidConfig means a network can't be built from a Config
+	ErrInvalidConfig = errors.New("invalid config")
+	// ErrDimension means a slice doesn't match the layer it is for
+	ErrDimension = errors.New("dimension mismatch")
+)
+
+// Neural is a neural network. Predict is safe for concurrent use, training is not.
 type Neural struct {
 	Layers []*Layer
 	Biases [][]*Synapse
 	Config *Config
+
+	mu sync.Mutex // guards neuron and synapse values during a forward pass
 }
 
-// Config defines the network topology, activations, losses etc
-type Config struct {
-	// Number of inputs
-	Inputs int
-	// Defines topology:
-	// For instance, [5 3 3] signifies a network with two hidden layers
-	// containing 5 and 3 nodes respectively, followed an output layer
-	// containing 3 nodes.
-	Layout []int
-	// Activation functions: {ActivationTanh, ActivationReLU, ActivationSigmoid}
-	Activation ActivationType
-	// Solver modes: {ModeRegression, ModeBinary, ModeMultiClass, ModeMultiLabel}
-	Mode Mode
-	// Initializer for weights: {NewNormal(σ, μ), NewUniform(σ, μ)}
-	Weight WeightInitializer `json:"-"`
-	// Loss functions: {LossCrossEntropy, LossBinaryCrossEntropy, LossMeanSquared}
-	Loss LossType
-	// Apply bias nodes
-	Bias bool
-}
-
-// NewNeural returns a new neural network
-func NewNeural(c *Config) *Neural {
-
-	if c.Weight == nil {
-		c.Weight = NewUniform(0.5, 0)
+// NewNeural returns a new neural network. It fills in defaults on a copy of c, so c can be reused.
+func NewNeural(c *Config) (*Neural, error) {
+	if c == nil {
+		return nil, fmt.Errorf("config is nil: %w", ErrInvalidConfig)
 	}
-	if c.Activation == ActivationNone {
-		c.Activation = ActivationSigmoid
-	}
-	if c.Loss == LossNone {
-		switch c.Mode {
-		case ModeMultiClass, ModeMultiLabel:
-			c.Loss = LossCrossEntropy
-		case ModeBinary:
-			c.Loss = LossBinaryCrossEntropy
-		default:
-			c.Loss = LossMeanSquared
-		}
+	config := *c
+	config.Layout = slices.Clone(c.Layout)
+	config.applyDefaults()
+	if err := config.validate(); err != nil {
+		return nil, err
 	}
 
-	layers := initializeLayers(c)
+	layers := initializeLayers(&config)
 
 	var biases [][]*Synapse
-	if c.Bias {
+	if config.Bias {
 		biases = make([][]*Synapse, len(layers))
-		for i := 0; i < len(layers); i++ {
-			if c.Mode == ModeRegression && i == len(layers)-1 {
-				continue
-			}
-			biases[i] = layers[i].ApplyBias(c.Weight)
+		for i, l := range layers {
+			biases[i] = l.ApplyBias(config.Weight)
 		}
 	}
 
 	return &Neural{
 		Layers: layers,
 		Biases: biases,
-		Config: c,
-	}
+		Config: &config,
+	}, nil
 }
 
 func initializeLayers(c *Config) []*Layer {
@@ -96,6 +76,26 @@ func initializeLayers(c *Config) []*Layer {
 	return layers
 }
 
+// Clone returns an independent network with the same topology, activations and weights
+func (n *Neural) Clone() (*Neural, error) {
+	config := *n.Config
+	config.Weight = zeroWeight
+	clone, err := NewNeural(&config)
+	if err != nil {
+		return nil, fmt.Errorf("cloning: %w", err)
+	}
+	// activations can be changed per neuron after construction
+	for i, l := range n.Layers {
+		for j, neuron := range l.Neurons {
+			clone.Layers[i].Neurons[j].A = neuron.A
+		}
+	}
+	if err := clone.ApplyWeights(n.Weights()); err != nil {
+		return nil, fmt.Errorf("cloning: %w", err)
+	}
+	return clone, nil
+}
+
 func (n *Neural) fire() {
 	for _, b := range n.Biases {
 		for _, s := range b {
@@ -107,13 +107,19 @@ func (n *Neural) fire() {
 	}
 }
 
-// Forward computes a forward pass
+// Forward computes a forward pass, leaving the result in each neuron's Value
 func (n *Neural) Forward(input []float64) error {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	return n.forward(input)
+}
+
+func (n *Neural) forward(input []float64) error {
 	if len(input) != n.Config.Inputs {
-		return fmt.Errorf("Invalid input dimension - expected: %d got: %d", n.Config.Inputs, len(input))
+		return fmt.Errorf("got %d inputs, want %d: %w", len(input), n.Config.Inputs, ErrDimension)
 	}
 	for _, n := range n.Layers[0].Neurons {
-		for i := 0; i < len(input); i++ {
+		for i := range input {
 			n.In[i].fire(input[i])
 		}
 	}
@@ -122,15 +128,19 @@ func (n *Neural) Forward(input []float64) error {
 }
 
 // Predict computes a forward pass and returns a prediction
-func (n *Neural) Predict(input []float64) []float64 {
-	n.Forward(input)
+func (n *Neural) Predict(input []float64) ([]float64, error) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
+	if err := n.forward(input); err != nil {
+		return nil, fmt.Errorf("predicting: %w", err)
+	}
 	outLayer := n.Layers[len(n.Layers)-1]
 	out := make([]float64, len(outLayer.Neurons))
 	for i, neuron := range outLayer.Neurons {
 		out[i] = neuron.Value
 	}
-	return out
+	return out, nil
 }
 
 // NumWeights returns the number of weights in the network

@@ -28,11 +28,9 @@ func Test_SplitN(t *testing.T) {
 }
 
 func Test_Split(t *testing.T) {
-	rand.Seed(0)
-
 	e := make(Examples, 100)
 
-	a, b := e.Split(0.5)
+	a, b := e.Split(0.5, rand.New(rand.NewSource(0)))
 
 	assert.InEpsilon(t, len(a), 50, 0.1)
 	assert.InEpsilon(t, len(b), 50, 0.1)

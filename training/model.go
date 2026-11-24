@@ -12,18 +12,15 @@ type Example struct {
 type Examples []Example
 
 // Shuffle shuffles slice in-place
-func (e Examples) Shuffle() {
-	for i := range e {
-		j := rand.Intn(i + 1)
-		e[i], e[j] = e[j], e[i]
-	}
+func (e Examples) Shuffle(random *rand.Rand) {
+	random.Shuffle(len(e), func(i, j int) { e[i], e[j] = e[j], e[i] })
 }
 
 // Split assigns each element to two new slices
 // according to probability p
-func (e Examples) Split(p float64) (first, second Examples) {
+func (e Examples) Split(p float64, random *rand.Rand) (first, second Examples) {
 	for i := 0; i < len(e); i++ {
-		if p > rand.Float64() {
+		if p > random.Float64() {
 			first = append(first, e[i])
 		} else {
 			second = append(second, e[i])
@@ -48,11 +45,4 @@ func (e Examples) SplitN(n int) []Examples {
 		res[i%n] = append(res[i%n], el)
 	}
 	return res
-}
-
-func min(a, b int) int {
-	if a <= b {
-		return a
-	}
-	return b
 }
